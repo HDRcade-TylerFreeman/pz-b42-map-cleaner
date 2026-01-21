@@ -15,12 +15,12 @@
     *{box-sizing:border-box}
     html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:var(--sans)}
     .app{display:flex;height:100vh;width:100vw;overflow:hidden}
-    .sidebar{width:430px;min-width:320px;max-width:580px;background:linear-gradient(180deg,var(--panel),var(--panel2));
+    .sidebar{width:410px;min-width:320px;max-width:560px;background:linear-gradient(180deg,var(--panel),var(--panel2));
       border-right:1px solid var(--line);padding:16px 14px;overflow:auto}
     .main{flex:1;position:relative;background:#070a10}
     canvas{position:absolute;inset:0;width:100%;height:100%}
 
-    .brand{display:flex;align-items:center;gap:10px;padding:8px 10px 8px}
+    .brand{display:flex;align-items:center;gap:10px;padding:8px 10px 10px}
     .dot{width:10px;height:10px;border-radius:999px;background:var(--accent);box-shadow:0 0 0 4px rgba(110,168,255,.18)}
     .brand h1{font-size:15px;margin:0}
     .brand .sub{font-size:12px;color:var(--muted);margin-top:2px}
@@ -36,8 +36,7 @@
 
     .card{border:1px solid var(--line);border-radius:var(--radius);padding:12px;margin:10px 8px 12px;
       background:rgba(255,255,255,.02);box-shadow:var(--shadow)}
-    .card h2{font-size:13px;margin:0 0 10px;display:flex;align-items:center;gap:8px}
-    .card h2 .spacer{flex:1}
+    .card h2{font-size:13px;margin:0 0 10px}
 
     .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     button,input,textarea,select{font-family:inherit;color:var(--text)}
@@ -62,42 +61,17 @@
       background:rgba(255,255,255,.06);font-size:11px;color:var(--muted)}
     .divider{height:1px;background:var(--line);margin:10px 0}
     .log{white-space:pre-wrap;font-family:var(--mono);font-size:10px;color:rgba(231,238,252,.75);background:rgba(0,0,0,.25);
-      border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:8px 10px;max-height:170px;overflow:auto}
+      border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:8px 10px;max-height:160px;overflow:auto}
     .fileHidden{display:none}
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+
     .hud{position:absolute;left:10px;bottom:10px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.12);
       border-radius:12px;padding:8px 10px;font-size:11px;color:var(--muted);backdrop-filter:blur(6px);user-select:none;max-width:calc(100% - 20px)}
     .kbd{font-family:var(--mono);font-size:10px;padding:2px 6px;border:1px solid rgba(255,255,255,.18);border-radius:8px;
       background:rgba(255,255,255,.05);color:var(--text)}
+    .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--danger)}
     .small{font-size:10px;color:rgba(231,238,252,.70)}
-
-    .tip{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:999px;
-      border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:rgba(231,238,252,.9);
-      font-size:12px;font-weight:800;cursor:pointer;user-select:none}
-    .tip:hover{border-color:rgba(110,168,255,.35);background:rgba(110,168,255,.10)}
-    .tooltipBox{
-      position:fixed; z-index:5000; max-width:320px; padding:10px 11px; border-radius:12px;
-      background:rgba(0,0,0,.86); border:1px solid rgba(255,255,255,.14);
-      box-shadow:0 16px 40px rgba(0,0,0,.45);
-      color:rgba(231,238,252,.92); font-size:11px; line-height:1.35;
-      display:none;
-    }
-    .tooltipBox b{color:#fff}
-
-    .modalBackdrop{position:fixed;inset:0;background:rgba(0,0,0,.62);display:none;align-items:center;justify-content:center;z-index:6000}
-    .modal{width:min(560px, calc(100vw - 24px)); background:#070a10; border:1px solid rgba(255,255,255,.14); border-radius:16px;
-      box-shadow:0 22px 60px rgba(0,0,0,.55); padding:14px 14px 12px}
-    .modal h3{margin:0 0 8px;font-size:14px}
-    .modal .sub{color:var(--muted);font-size:12px;margin-bottom:10px;line-height:1.35}
-    .modal .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;margin-top:12px}
-    .modal .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .modal .opt{border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:10px; background:rgba(255,255,255,.03)}
-    .modal .opt h4{margin:0 0 6px;font-size:13px}
-    .modal .opt p{margin:0;color:var(--muted);font-size:11px;line-height:1.35}
-    .modal .opt button{width:100%;margin-top:10px}
-    .modal .warnBox{border:1px solid rgba(255,184,107,.25); background:rgba(255,184,107,.08); padding:10px; border-radius:12px; color:rgba(255,219,170,.95); font-size:11px; line-height:1.35}
-    .modal .checkRow{display:flex;gap:10px;align-items:flex-start;color:var(--muted);font-size:11px;line-height:1.35}
-    .modal input[type="checkbox"]{transform:translateY(2px)}
   </style>
 </head>
 <body>
@@ -107,32 +81,35 @@
       <div class="dot"></div>
       <div>
         <h1>HDRcade PZ B42 Map Cleaner (42.13+)</h1>
-        <div class="sub">Shift+Drag select · Cell keep zones · Safe scripts · GitHub Pages ready</div>
+        <div class="sub">Shift+Drag select · Wheel zoom · Drag pan · “Keep Cells” inverse delete</div>
       </div>
     </div>
 
     <div class="links">
-      <a class="alink" href="https://steamcommunity.com/id/HDRcade/myworkshopfiles/?appid=108600" target="_blank" rel="noopener">Workshop <span>Steam</span></a>
-      <a class="alink" href="https://patreon.com/HDRcade" target="_blank" rel="noopener">Support <span>Patreon</span></a>
-      <a class="alink" href="https://ko-fi.com/HDRcade" target="_blank" rel="noopener">Tip <span>Ko-fi</span></a>
-      <a class="alink" href="https://pine.host/hdrcade" target="_blank" rel="noopener">Hosting <span>Pine</span></a>
-      <a class="alink" href="guide.html" target="_blank" rel="noopener">Guide <span>Full</span></a>
+      <a class="alink" href="https://steamcommunity.com/id/HDRcade/myworkshopfiles/?appid=108600" target="_blank" rel="noopener">
+        Workshop <span>Steam</span>
+      </a>
+      <a class="alink" href="https://patreon.com/HDRcade" target="_blank" rel="noopener">
+        Support <span>Patreon</span>
+      </a>
+      <a class="alink" href="https://ko-fi.com/HDRcade" target="_blank" rel="noopener">
+        Tip <span>Ko-fi</span>
+      </a>
+      <a class="alink" href="https://pine.host/hdrcade" target="_blank" rel="noopener">
+        Hosting <span>Pine</span>
+      </a>
     </div>
 
     <div class="card">
-      <h2>
-        1) Load a save folder
-        <span class="spacer"></span>
-        <span class="tip" data-tip="Pick the SAVE ROOT folder (the one that contains the <b>map/</b> folder). Nothing is deleted until you confirm later.&#10;&#10;✅ Best option: <b>Read/Write</b> so the tool can delete files for you.&#10;&#10;✅ If you only want to preview/export: use <b>Read-Only</b>.">i</span>
-      </h2>
+      <h2>1) Load a save folder</h2>
       <div class="row">
         <button id="btnPickRW">Select Save Folder (Read/Write)</button>
-        <button id="btnPickRO" class="secondary">Load Read-Only</button>
+        <button id="btnPickRO" class="secondary">Load Read-Only (file input)</button>
         <input id="roInput" class="fileHidden" type="file" webkitdirectory directory multiple />
       </div>
       <div class="divider"></div>
       <div class="row" style="gap:10px;">
-        <span class="pill"><span id="secureDot" class="mono">●</span> <span id="secureTxt">Checking secure context…</span></span>
+        <span class="pill"><span id="secureDot" class="mono">●</span> <span id="secureTxt">Checking…</span></span>
         <span class="pill"><span class="mono">bins</span>: <b id="binCount">0</b></span>
         <span class="pill"><span class="mono">selected</span>: <b id="selCount">0</b></span>
       </div>
@@ -141,11 +118,7 @@
     </div>
 
     <div class="card">
-      <h2>
-        2) Basemap (background)
-        <span class="spacer"></span>
-        <span class="tip" data-tip="Put <b>map.jpg</b> (or map.png/webp/jpeg) in the same folder as index.html and it will auto-load.&#10;&#10;Use the TR/BL coordinates to lock the image so tile coordinates line up with the map.">i</span>
-      </h2>
+      <h2>2) Basemap (background)</h2>
       <div class="row">
         <button id="btnReloadMap" class="secondary">Auto-load map.*</button>
         <button id="btnBgFile" class="secondary">Upload basemap</button>
@@ -171,7 +144,10 @@
 
       <div class="divider"></div>
 
-      <div class="hint">Corner lock (tile coords): your values are prefilled.</div>
+      <div class="hint">
+        Corner lock (tile coords): your values are prefilled.
+      </div>
+
       <div class="divider"></div>
 
       <div class="grid2">
@@ -187,15 +163,11 @@
       </div>
 
       <div class="hint" id="bgStatus" style="margin-top:10px;">Basemap: none</div>
-      <div class="small" id="bgAutoHint" style="margin-top:6px;">Tip: map.jpg must be in the same directory as this page (GitHub Pages is case-sensitive).</div>
+      <div class="small" id="bgAutoHint" style="margin-top:6px;">Tip: put map.jpg next to this HTML (or in same repo folder on GitHub Pages).</div>
     </div>
 
     <div class="card">
-      <h2>
-        3) Grid + dry-run
-        <span class="spacer"></span>
-        <span class="tip" data-tip="<b>Dry-run heatmap</b> shows what would happen before deleting anything.&#10;&#10;<span style='color:#5cffb2'>Green</span> = kept, <span style='color:#ff5c5c'>Red</span> = would delete, <span style='color:#ffb86b'>Amber</span> = currently selected.">i</span>
-      </h2>
+      <h2>3) Grid overlay</h2>
       <div class="row">
         <label class="pill" style="cursor:pointer;">
           <input id="gridOn" type="checkbox" checked style="margin-right:8px;">Show grid
@@ -237,20 +209,20 @@
           <input id="gridMinZoom" type="number" value="0.75" step="0.05" min="0.1"/>
         </div>
       </div>
+
+      <div class="hint" style="margin-top:10px;">
+        Heatmap colors: <span class="ok">green = kept</span>, <span class="bad">red = would delete</span>. Selected bins override in amber.
+      </div>
     </div>
 
     <div class="card">
-      <h2>
-        4) Keep Cells (inverse delete)
-        <span class="spacer"></span>
-        <span class="tip" data-tip="This is the safest way to reset the world: list the <b>Cell grids</b> you want to keep, then the tool will select everything else for deletion.&#10;&#10;Format: <b>7,38</b> or range <b>7,38 -> 9,40</b>.">i</span>
-      </h2>
+      <h2>4) Keep Cells (inverse delete)</h2>
 
       <div class="row">
         <label class="pill" style="cursor:pointer;">
           <input id="keepEnabled" type="checkbox" style="margin-right:8px;">Enable “keep these cells”
         </label>
-        <button id="btnApplyInverse" class="danger" disabled>Apply inverse selection</button>
+        <button id="btnApplyInverse" class="danger" disabled>Apply inverse selection (delete everything else)</button>
       </div>
 
       <div class="divider"></div>
@@ -259,9 +231,9 @@
       <textarea id="keepCellsText" placeholder="7,38&#10;8,38&#10;7,38 -> 9,40"></textarea>
 
       <div class="row" style="margin-top:10px;">
-        <button id="btnKeepParse" class="secondary">Parse / Replace</button>
-        <button id="btnKeepAdd" class="secondary">Parse / Add</button>
-        <button id="btnKeepClear" class="secondary">Clear list</button>
+        <button id="btnKeepParse" class="secondary">Parse / Replace manual keep list</button>
+        <button id="btnKeepAdd" class="secondary">Parse / Add to manual keep list</button>
+        <button id="btnKeepClear" class="secondary">Clear manual keep list</button>
       </div>
 
       <div class="divider"></div>
@@ -280,14 +252,14 @@
         </div>
       </div>
       <div class="hint" style="margin-top:8px;">
-        Presets are best-effort boxes. If you need perfect accuracy, use b42map to find the exact cells.
+        Presets are best-effort bounding boxes. Use b42map “Lock Coordinates” to refine if needed.
       </div>
 
       <div class="divider"></div>
 
       <div class="row">
         <label class="pill" style="cursor:pointer;">
-          <input id="safehouseAuto" type="checkbox" style="margin-right:8px;">Auto-protect safehouses
+          <input id="safehouseAuto" type="checkbox" style="margin-right:8px;">Auto-protect safehouse cells
         </label>
         <button id="btnScanSafehouses" class="secondary" disabled>Scan safehouses</button>
       </div>
@@ -310,14 +282,14 @@
         <span class="pill"><span class="mono">preset</span>: <b id="keepPresetCount">0</b></span>
         <span class="pill"><span class="mono">safehouse</span>: <b id="keepSafehouseCount">0</b></span>
       </div>
+
+      <div class="hint" style="margin-top:10px;">
+        When enabled, heatmap uses “keep bins” vs “would delete”. Clicking “Apply inverse selection” converts would-delete into the actual delete selection.
+      </div>
     </div>
 
     <div class="card">
-      <h2>
-        5) Selection tools
-        <span class="spacer"></span>
-        <span class="tip" data-tip="You can select bins by:&#10;• <b>Shift + Drag</b> on the map&#10;• Pasting two tile coordinates from b42map&#10;&#10;Selection is always in <b>bin files</b> (8 tiles).">i</span>
-      </h2>
+      <h2>5) Selection tools</h2>
       <div class="hint">
         <span class="kbd">Shift</span> + <span class="kbd">Drag</span> adds rectangles.
       </div>
@@ -330,34 +302,18 @@
         <button id="btnPreview" class="secondary" disabled>Toggle: show only selected</button>
       </div>
       <div class="hint" style="margin-top:10px;">
-        Bin files live in <span class="mono">map/&lt;binX&gt;/&lt;binY&gt;.bin</span>
+        Selection deletes bins: <span class="mono">map/&lt;binX&gt;/&lt;binY&gt;.bin</span> (bin = floor(tile/8)).
       </div>
     </div>
 
     <div class="card">
-      <h2>
-        6) Export / Delete
-        <span class="spacer"></span>
-        <span class="tip" data-tip="You can either:&#10;• export a script (.bat/.sh) to run on your server&#10;• or delete directly (only available in Read/Write mode).&#10;&#10;Scripts include <b>safety checks</b> so they fail if run from the wrong directory.">i</span>
-      </h2>
+      <h2>6) Export / Delete</h2>
       <div class="row">
-        <button id="btnExportDeleteScript" class="danger" disabled>Export delete script</button>
+        <button id="btnExportDeleteScript" class="secondary" disabled>Export delete script</button>
         <button id="btnDelete" class="danger" disabled>Delete selected bins (map only)</button>
       </div>
-      <div class="hint" style="margin-top:10px;color:var(--warn);">
-        Always stop the server and back up the save folder first.
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>
-        Guide
-        <span class="spacer"></span>
-        <span class="tip" data-tip="Opens the full guide in a popup. You can also open guide.html in a new tab.">i</span>
-      </h2>
-      <div class="row">
-        <button id="btnOpenGuide" class="secondary">📘 Open Guide (popup)</button>
-        <a class="alink" href="guide.html" target="_blank" rel="noopener">Open guide.html <span>tab</span></a>
+      <div class="hint warn" style="margin-top:10px;">
+        Always back up the save folder first. Delete only affects <span class="mono">map/</span> bin files.
       </div>
     </div>
 
@@ -373,62 +329,7 @@
   </div>
 </div>
 
-<div id="tooltipBox" class="tooltipBox"></div>
-
-<div id="osModal" class="modalBackdrop">
-  <div class="modal">
-    <h3>Export delete script</h3>
-    <div class="sub">Choose the OS you will run the script on. The file will download as <b>.bat</b> (Windows) or <b>.sh</b> (Linux/Docker).</div>
-
-    <div class="warnBox">
-      <b>IMPORTANT:</b> You must run the script from your <b>Save root directory</b> — the folder that contains <b>map/</b>.
-      The script will refuse to run if <b>map/</b> is not found.
-      <br><br>
-      Also: stop the server and make a backup first.
-    </div>
-
-    <div class="divider"></div>
-
-    <div class="row">
-      <label class="pill" style="cursor:pointer;">
-        <input id="exportDryRun" type="checkbox" style="margin-right:8px;" checked>Dry-run script (prints deletes, does not delete)
-      </label>
-      <label class="pill" style="cursor:pointer;">
-        <input id="rememberOS" type="checkbox" style="margin-right:8px;" checked>Remember my choice
-      </label>
-    </div>
-
-    <div class="divider"></div>
-
-    <div class="two">
-      <div class="opt">
-        <h4>Windows</h4>
-        <p>Exports <b>HDRcade_Delete_MapBins.bat</b><br>Run by double-clicking, or in CMD from the save root.</p>
-        <button id="btnExportWin">🪟 Export .bat</button>
-      </div>
-      <div class="opt">
-        <h4>Linux / Docker</h4>
-        <p>Exports <b>HDRcade_Delete_MapBins.sh</b><br>Run with chmod +x then ./ script from the save root.</p>
-        <button id="btnExportLinux">🐧 Export .sh</button>
-      </div>
-    </div>
-
-    <div class="actions">
-      <button id="btnCloseOS" class="secondary">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<div id="guideModal" class="modalBackdrop">
-  <div class="modal" style="width:min(920px, calc(100vw - 24px)); height:min(86vh, 820px); padding:10px;">
-    <div class="row" style="justify-content:space-between;align-items:center;padding:4px 6px 8px;">
-      <div style="font-weight:800;">HDRcade Guide</div>
-      <button id="btnCloseGuide" class="secondary">Close</button>
-    </div>
-    <iframe src="guide.html" style="width:100%;height:calc(100% - 40px);border:1px solid rgba(255,255,255,.12);border-radius:12px;background:#070a10"></iframe>
-  </div>
-</div>
-
+<!-- sql.js for safehouse scanning (CDN). If offline, safehouse scan will simply disable itself. -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>
 
 <script>
@@ -440,6 +341,7 @@
   const hud = $("hud");
   const logEl = $("log");
 
+  // Save loading
   const btnPickRW = $("btnPickRW");
   const btnPickRO = $("btnPickRO");
   const roInput = $("roInput");
@@ -447,9 +349,8 @@
   const selCount = $("selCount");
   const boundsTxt = $("boundsTxt");
   const writeTxt = $("writeTxt");
-  const secureDot = $("secureDot");
-  const secureTxt = $("secureTxt");
 
+  // Basemap
   const btnReloadMap = $("btnReloadMap");
   const btnBgFile = $("btnBgFile");
   const bgFileInput = $("bgFileInput");
@@ -461,6 +362,7 @@
   const btnFitToBins = $("btnFitToBins");
   const bgStatus = $("bgStatus");
 
+  // Grid
   const gridOn = $("gridOn");
   const gridLabels = $("gridLabels");
   const heatmapOn = $("heatmapOn");
@@ -469,6 +371,7 @@
   const gridOpacity = $("gridOpacity");
   const gridMinZoom = $("gridMinZoom");
 
+  // Keep
   const keepEnabled = $("keepEnabled");
   const btnApplyInverse = $("btnApplyInverse");
   const keepCellsText = $("keepCellsText");
@@ -487,104 +390,85 @@
   const keepPresetCount = $("keepPresetCount");
   const keepSafehouseCount = $("keepSafehouseCount");
 
+  // Selection
   const coordsPaste = $("coordsPaste");
   const btnAddRect = $("btnAddRect");
   const btnClearRects = $("btnClearRects");
   const btnPreview = $("btnPreview");
 
+  // Actions
   const btnExportDeleteScript = $("btnExportDeleteScript");
   const btnDelete = $("btnDelete");
-
-  const osModal = $("osModal");
-  const exportDryRun = $("exportDryRun");
-  const rememberOS = $("rememberOS");
-  const btnExportWin = $("btnExportWin");
-  const btnExportLinux = $("btnExportLinux");
-  const btnCloseOS = $("btnCloseOS");
-
-  const guideModal = $("guideModal");
-  const btnOpenGuide = $("btnOpenGuide");
-  const btnCloseGuide = $("btnCloseGuide");
-
-  const tooltipBox = $("tooltipBox");
 
   function log(msg){
     const t = new Date().toISOString().slice(11,19);
     logEl.textContent = "[" + t + "] " + msg + "\n" + logEl.textContent;
   }
 
-  // Tooltip system (hover + tap)
-  let tipPinned = false;
-  function showTip(el){
-    const html = el.getAttribute("data-tip") || "";
-    tooltipBox.innerHTML = html.replace(/\n/g, "<br>");
-    tooltipBox.style.display = "block";
-
-    const r = el.getBoundingClientRect();
-    const pad = 10;
-    let x = r.left;
-    let y = r.bottom + 8;
-
-    const bw = 340;
-    const bh = 170;
-    if (x + bw > window.innerWidth - pad) x = window.innerWidth - pad - bw;
-    if (y + bh > window.innerHeight - pad) y = r.top - bh - 8;
-
-    tooltipBox.style.left = Math.max(pad, x) + "px";
-    tooltipBox.style.top  = Math.max(pad, y) + "px";
-  }
-  document.addEventListener("mouseover", (e) => {
-    const el = e.target.closest(".tip");
-    if (!el) return;
-    if (tipPinned) return;
-    showTip(el);
-  });
-  document.addEventListener("mouseout", (e) => {
-    if (e.target.closest(".tip") && !tipPinned) tooltipBox.style.display = "none";
-  });
-  document.addEventListener("click", (e) => {
-    const el = e.target.closest(".tip");
-    if (el){
-      if (tipPinned && tooltipBox.style.display === "block"){
-        tipPinned = false;
-        tooltipBox.style.display = "none";
-      }else{
-        tipPinned = true;
-        showTip(el);
-      }
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
-    tipPinned = false;
-    tooltipBox.style.display = "none";
-  });
-
+  // Secure context indicator
   const secure = window.isSecureContext;
-  secureDot.style.color = secure ? "var(--ok)" : "var(--warn)";
-  secureTxt.textContent = secure ? "Secure context OK." : "Not secure. Use http://localhost or GitHub Pages.";
+  $("secureDot").style.color = secure ? "var(--ok)" : "var(--warn)";
+  $("secureTxt").textContent = secure
+    ? "Secure context OK."
+    : "Not secure. Use http://localhost or GitHub Pages.";
   if (!secure) log("Not secure context. Use localhost or GitHub Pages for folder picker.");
 
+  // ---- SQL.js loader (for safehouse scan) ----
+  let SQL = null;
+  async function ensureSql(){
+    try{
+      if (!window.initSqlJs) return false;
+      if (SQL) return true;
+      SQL = await window.initSqlJs({
+        locateFile: (file) => "https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/" + file
+      });
+      return true;
+    }catch(e){
+      return false;
+    }
+  }
+
+  // ---- State ----
   const S = {
     writeAccess: false,
     rootHandle: null,
     mapHandle: null,
-    xDirs: new Map(),
-    bins: [],
-    binSet: new Set(),
-    bounds: null,
+    xDirs: new Map(), // x -> DirectoryHandle
+    bins: [], // {x,y}
+    binSet: new Set(), // "x,y"
+    bounds: null, // {minX,maxX,minY,maxY}
 
     view: { cx: 0, cy: 0, scale: 6 },
     drag: { active:false, mode:"pan", sx:0, sy:0, startCx:0, startCy:0, rect:null },
     hover: { bxf:0, byf:0 },
 
-    selectedRects: [],
+    selectedRects: [], // {x0,y0,x1,y1} in bin coords
     selectedSet: new Set(),
     showOnlySelected: false,
 
-    bg: { img:null, opacity:0.65, smoothing:true, sx:1, sy:1, offX:0, offY:0, locked:false, srcLabel:"" },
+    // Basemap pixel->world bin mapping
+    bg: {
+      img: null,
+      opacity: 0.65,
+      smoothing: true,
+      // bx = offX + px*sx; by = offY + py*sy
+      sx: 1, sy: 1, offX: 0, offY: 0,
+      locked: false,
+      srcLabel: ""
+    },
 
-    keep: { enabled:false, manualRects:[], presetRects:[], safehouseRects:[], keepBinSet:new Set(), dirty:true }
+    // Keep system
+    keep: {
+      enabled: false,
+
+      manualRects: [],    // cell-rects: {cx0,cy0,cx1,cy1}
+      presetRects: [],    // cell-rects
+      safehouseRects: [], // cell-rects discovered
+
+      // derived
+      keepBinSet: new Set(),   // bins that are kept
+      dirty: true
+    }
   };
 
   function key(x,y){ return x + "," + y; }
@@ -608,7 +492,24 @@
     return { bx: (px - cv.width/2)/s + S.view.cx, by: (py - cv.height/2)/s + S.view.cy };
   }
 
+  // Parse b42map-like coords
+  function parseCoords(text){
+    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    const out = [];
+    for (const line of lines){
+      let m = line.match(/(-?\d+)\s*x\s*(-?\d+)/i);
+      if (m){ out.push([+m[1], +m[2]]); continue; }
+      m = line.match(/x\s*:\s*(-?\d+).*?y\s*:\s*(-?\d+)/i);
+      if (m){ out.push([+m[1], +m[2]]); continue; }
+      m = line.match(/(-?\d+)\s*,\s*(-?\d+)/);
+      if (m){ out.push([+m[1], +m[2]]); continue; }
+    }
+    return out;
+  }
+
+  // For basemap alignment we must use FLOAT bins (no floor)
   function tileToBinFloat(x,y){ return { bx: x/8, by: y/8 }; }
+  // For selecting actual bin files, we want floor bins
   function tileToBinFloor(x,y){ return { bx: Math.floor(x/8), by: Math.floor(y/8) }; }
 
   function updateStats(){
@@ -642,13 +543,17 @@
     btnApplyCornerLock.disabled = !hasBg;
     btnFitToBins.disabled = !(hasBg && !!S.bounds);
 
-    bgStatus.textContent = hasBg ? ("Basemap: " + S.bg.srcLabel + " · " + (S.bg.locked ? "LOCKED" : "not locked")) : "Basemap: none";
+    bgStatus.textContent = hasBg
+      ? ("Basemap: " + S.bg.srcLabel + " · " + (S.bg.locked ? "LOCKED" : "not locked"))
+      : "Basemap: none";
 
+    // Keep actions
     btnApplyInverse.disabled = !(S.keep.enabled && S.bins.length > 0);
   }
 
-  // Basemap
+  // ---- Basemap loading ----
   function isBlobUrl(url){ return typeof url === "string" && url.startsWith("blob:"); }
+
   function setBasemapImage(img, label){
     S.bg.img = img;
     S.bg.opacity = Number(bgOpacity.value);
@@ -658,11 +563,14 @@
     log("Basemap loaded: " + label + " (" + img.naturalWidth + "x" + img.naturalHeight + ")");
     setButtons();
   }
+
   function loadBasemapFromUrl(url, label, cacheBust=true){
     return new Promise((resolve) => {
       const img = new Image();
       img.onload = () => { setBasemapImage(img, label); resolve(true); };
       img.onerror = () => resolve(false);
+
+      // cache bust only for http(s)/relative, never for blob:
       let src = url;
       if (cacheBust && !isBlobUrl(url)){
         src = url + (url.includes("?") ? "&" : "?") + "t=" + Date.now();
@@ -670,6 +578,7 @@
       img.src = src;
     });
   }
+
   async function autoLoadMapImage(){
     const candidates = ["map.jpg","map.jpeg","map.png","map.webp"];
     for (const name of candidates){
@@ -682,35 +591,48 @@
     log("No map.* found next to this HTML. (Tried: " + candidates.join(", ") + ")");
     return false;
   }
+
   function clearBasemap(){
-    S.bg.img = null; S.bg.locked = false; S.bg.srcLabel = "";
+    S.bg.img = null;
+    S.bg.locked = false;
+    S.bg.srcLabel = "";
     log("Basemap cleared.");
     setButtons();
   }
+
   function applyCornerLockFromInputs(isAuto=false){
     if (!S.bg.img){ log("Load a basemap first."); return; }
+
     const TRX = Number(trX.value), TRY = Number(trY.value);
     const BLX = Number(blX.value), BLY = Number(blY.value);
     if (![TRX,TRY,BLX,BLY].every(n => Number.isFinite(n))){
       log("Corner lock: please enter numeric TR/BL values.");
       return;
     }
+
+    // Derive TL + BR assuming axis-aligned box
     const TLX = BLX;
     const TLY = TRY;
     const BRX = TRX;
     const BRY = BLY;
+
     const tl = tileToBinFloat(TLX, TLY);
     const br = tileToBinFloat(BRX, BRY);
+
     const W = S.bg.img.naturalWidth;
     const H = S.bg.img.naturalHeight;
+
     S.bg.sx = (br.bx - tl.bx) / W;
     S.bg.sy = (br.by - tl.by) / H;
     S.bg.offX = tl.bx;
     S.bg.offY = tl.by;
+
     S.bg.locked = true;
+
     log((isAuto ? "Auto-lock" : "Corner lock") + ": TL(" + TLX + "," + TLY + ") BR(" + BRX + "," + BRY + ")");
     setButtons();
   }
+
   function fitBasemapToBinsRough(){
     if (!S.bg.img || !S.bounds) return;
     const W = S.bg.img.naturalWidth;
@@ -719,36 +641,60 @@
     const by0 = S.bounds.minY;
     const bx1 = S.bounds.maxX + 1;
     const by1 = S.bounds.maxY + 1;
+
     S.bg.sx = (bx1 - bx0) / W;
     S.bg.sy = (by1 - by0) / H;
     S.bg.offX = bx0;
     S.bg.offY = by0;
     S.bg.locked = false;
+
     log("Basemap fit to loaded bins (rough). Prefer corner lock for accurate world coords.");
     setButtons();
   }
 
-  // Keep system
+  // ---- Keep cells parsing ----
   function parseCellList(text){
     const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
     const out = [];
     for (const l of lines){
+      // range: 7,38 -> 9,40
       let m = l.match(/(\d+)\s*,\s*(\d+)\s*->\s*(\d+)\s*,\s*(\d+)/);
       if (m){
-        out.push({ cx0: Math.min(+m[1], +m[3]), cy0: Math.min(+m[2], +m[4]), cx1: Math.max(+m[1], +m[3]), cy1: Math.max(+m[2], +m[4]) });
+        out.push({
+          cx0: Math.min(+m[1], +m[3]),
+          cy0: Math.min(+m[2], +m[4]),
+          cx1: Math.max(+m[1], +m[3]),
+          cy1: Math.max(+m[2], +m[4]),
+        });
         continue;
       }
+      // single: 7,38
       m = l.match(/(\d+)\s*,\s*(\d+)/);
-      if (m){ const cx = +m[1], cy = +m[2]; out.push({ cx0: cx, cy0: cy, cx1: cx, cy1: cy }); }
+      if (m){
+        const cx = +m[1], cy = +m[2];
+        out.push({ cx0: cx, cy0: cy, cx1: cx, cy1: cy });
+      }
     }
     return out;
   }
-  function addRects(dst, rects){ for (const r of rects) dst.push(r); }
+
+  function addRects(dst, rects){
+    for (const r of rects) dst.push(r);
+  }
+
+  function clearKeepSafehouses(){
+    S.keep.safehouseRects = [];
+    keepSafehouseCount.textContent = "0";
+    safehouseStatus.textContent = "Safehouses: not scanned.";
+    S.keep.dirty = true;
+  }
+
   function updateKeepCounts(){
     keepManualCount.textContent = String(S.keep.manualRects.length);
     keepPresetCount.textContent = String(S.keep.presetRects.length);
     keepSafehouseCount.textContent = String(S.keep.safehouseRects.length);
   }
+
   function allKeepCellRects(){
     const out = [];
     addRects(out, S.keep.manualRects);
@@ -756,13 +702,18 @@
     if (safehouseAuto.checked) addRects(out, S.keep.safehouseRects);
     return out;
   }
+
   function rebuildKeepBins(){
     S.keep.keepBinSet.clear();
+
     if (!S.keep.enabled) { S.keep.dirty = false; return; }
     if (S.bins.length === 0) { S.keep.dirty = false; return; }
+
     const rects = allKeepCellRects();
     if (rects.length === 0) { S.keep.dirty = false; return; }
 
+    // Convert each cell-rect to a bin-rect range, then add existing bins.
+    // Cell is 300x300 tiles; bin is 8x8 tiles; 300/8 = 37.5 (not aligned).
     for (const r of rects){
       for (let cx = r.cx0; cx <= r.cx1; cx++){
         for (let cy = r.cy0; cy <= r.cy1; cy++){
@@ -785,18 +736,24 @@
         }
       }
     }
+
     S.keep.dirty = false;
   }
+
   function wouldDeleteKey(k){
     if (!S.keep.enabled) return false;
     if (S.keep.dirty) rebuildKeepBins();
+    // delete everything else => would delete if not in keepBinSet
     return !S.keep.keepBinSet.has(k);
   }
+
   function applyInverseSelectionFromKeep(){
     if (!S.keep.enabled) { log("Enable Keep Cells first."); return; }
     if (S.keep.dirty) rebuildKeepBins();
+
     S.selectedRects = [];
     S.selectedSet.clear();
+
     let count = 0;
     for (const k of S.binSet){
       if (!S.keep.keepBinSet.has(k)){
@@ -804,73 +761,28 @@
         count++;
       }
     }
+
     log("Inverse selection applied. Selected bins to delete: " + count);
     updateStats();
     setButtons();
   }
+
+  // ---- Presets (best-effort bounding boxes) ----
   function presetRectsById(id){
-    if (id === "louisville") return [{ cx0: 40, cy0: 8, cx1: 56, cy1: 21 }];
-    if (id === "muldraugh") return [{ cx0: 33, cy0: 30, cx1: 38, cy1: 39 }];
+    // These are intentionally generous “keep” rectangles in CELL coords.
+    // If you want to tighten them: use b42map Lock Coordinates to find tile extents, then divide by 300.
+    if (id === "louisville"){
+      // Approx Louisville region (B41/B42 ballpark): tiles x~12000-17000, y~2500-6500 => cells x 40-56, y 8-21
+      return [{ cx0: 40, cy0: 8, cx1: 56, cy1: 21 }];
+    }
+    if (id === "muldraugh"){
+      // Approx Muldraugh region: tiles x~9900-11400, y~9000-11800 => cells x 33-38, y 30-39
+      return [{ cx0: 33, cy0: 30, cx1: 38, cy1: 39 }];
+    }
     return [];
   }
 
-  // Selection
-  function parseCoords(text){
-    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-    const out = [];
-    for (const line of lines){
-      let m = line.match(/(-?\d+)\s*x\s*(-?\d+)/i);
-      if (m){ out.push([+m[1], +m[2]]); continue; }
-      m = line.match(/x\s*:\s*(-?\d+).*?y\s*:\s*(-?\d+)/i);
-      if (m){ out.push([+m[1], +m[2]]); continue; }
-      m = line.match(/(-?\d+)\s*,\s*(-?\d+)/);
-      if (m){ out.push([+m[1], +m[2]]); continue; }
-    }
-    return out;
-  }
-  function rebuildSelection(){
-    S.selectedSet.clear();
-    if (S.selectedRects.length === 0) return;
-    for (const r of S.selectedRects){
-      const minX = Math.floor(Math.min(r.x0,r.x1));
-      const maxX = Math.floor(Math.max(r.x0,r.x1) - 1e-9);
-      const minY = Math.floor(Math.min(r.y0,r.y1));
-      const maxY = Math.floor(Math.max(r.y0,r.y1) - 1e-9);
-      for (let x=minX; x<=maxX; x++){
-        for (let y=minY; y<=maxY; y++){
-          const k = key(x,y);
-          if (S.binSet.has(k)) S.selectedSet.add(k);
-        }
-      }
-    }
-    updateStats();
-  }
-  function addRectFromPaste(){
-    const pts = parseCoords(coordsPaste.value);
-    if (pts.length < 2){ log("Paste coords: need 2 points."); return; }
-    const a = pts[0], b = pts[1];
-    const minX = Math.min(a[0], b[0]);
-    const minY = Math.min(a[1], b[1]);
-    const maxX = Math.max(a[0], b[0]);
-    const maxY = Math.max(a[1], b[1]);
-    const p0 = tileToBinFloor(minX, minY);
-    const p1 = tileToBinFloor(maxX, maxY);
-    const r = { x0: p0.bx, y0: p0.by, x1: p1.bx + 1, y1: p1.by + 1 };
-    S.selectedRects.push(r);
-    rebuildSelection();
-    log("Added selection rect. Selected bins: " + S.selectedSet.size);
-    setButtons();
-  }
-  function clearRects(){
-    S.selectedRects = [];
-    S.selectedSet.clear();
-    S.showOnlySelected = false;
-    updateStats();
-    log("Cleared selection rectangles.");
-    setButtons();
-  }
-
-  // Save loading RW/RO
+  // ---- Save scanning ----
   async function loadFromDirectoryRW(){
     if (!window.showDirectoryPicker){
       log("Directory picker not supported in this browser. Use read-only file input.");
@@ -886,6 +798,7 @@
       S.binSet.clear();
       S.bounds = null;
 
+      // find map dir
       for await (const [name, h] of root.entries()){
         if (h.kind === "directory" && name.toLowerCase() === "map"){ S.mapHandle = h; break; }
       }
@@ -896,6 +809,7 @@
         return;
       }
 
+      // scan bins
       for await (const [xName, xDir] of S.mapHandle.entries()){
         if (xDir.kind !== "directory") continue;
         if (!/^-?\d+$/.test(xName)) continue;
@@ -923,12 +837,17 @@
       fitViewToBounds();
       log("Loaded bins (RW): " + S.bins.length);
 
+      // If basemap loaded, auto-lock again (world-anchored)
       if (S.bg.img) applyCornerLockFromInputs(true);
 
+      // Enable safehouse scan button if sql.js can load
       const okSql = await ensureSql();
       btnScanSafehouses.disabled = !okSql;
-      safehouseStatus.textContent = okSql ? "Safehouses: ready to scan (players.db)." : "Safehouses: SQL engine unavailable (offline/CDN blocked).";
+      safehouseStatus.textContent = okSql
+        ? "Safehouses: ready to scan (players.db)."
+        : "Safehouses: SQL engine unavailable (offline/CDN blocked).";
 
+      // Keep needs rebuild
       S.keep.dirty = true;
       updateKeepCounts();
       setButtons();
@@ -971,28 +890,23 @@
 
     if (S.bg.img) applyCornerLockFromInputs(true);
 
-    ensureSql().then(ok => {
-      btnScanSafehouses.disabled = !ok;
-      safehouseStatus.textContent = ok ? "Safehouses: ready to scan (include players.db in your chosen folder)." : "Safehouses: SQL engine unavailable (offline/CDN blocked).";
-    });
+    // Safehouse scan in RO mode: we can only scan if players.db is included in the directory selection.
+    (async () => {
+      const okSql = await ensureSql();
+      btnScanSafehouses.disabled = !okSql;
+      safehouseStatus.textContent = okSql
+        ? "Safehouses: ready to scan (include players.db in your chosen folder)."
+        : "Safehouses: SQL engine unavailable (offline/CDN blocked).";
+    })();
 
     S.keep.dirty = true;
     updateKeepCounts();
     setButtons();
   }
 
-  // Safehouse scan via sql.js
-  let SQL = null;
-  async function ensureSql(){
-    try{
-      if (!window.initSqlJs) return false;
-      if (SQL) return true;
-      SQL = await window.initSqlJs({ locateFile: (file) => "https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/" + file });
-      return true;
-    }catch(e){ return false; }
-  }
-
+  // ---- Safehouse scan heuristics (players.db via sql.js) ----
   async function getPlayersDbBytes(){
+    // RW: try root/players.db, root/db/players.db
     if (S.rootHandle){
       const candidates = ["players.db", "db/players.db"];
       for (const path of candidates){
@@ -1009,6 +923,8 @@
       }
       return null;
     }
+
+    // RO: look for file named players.db in the input list
     if (roInput.files && roInput.files.length){
       for (const f of roInput.files){
         const p = (f.webkitRelativePath || f.name).toLowerCase();
@@ -1039,14 +955,17 @@
       return;
     }
 
+    // open db
     let db;
-    try{ db = new SQL.Database(bytes); }
-    catch(e){
+    try{
+      db = new SQL.Database(bytes);
+    }catch(e){
       safehouseStatus.textContent = "Safehouses: failed to open players.db (not sqlite?).";
       log("Safehouse scan: failed to open sqlite: " + (e && e.message ? e.message : e));
       return;
     }
 
+    // list tables
     let tables = [];
     try{
       const res = db.exec("SELECT name FROM sqlite_master WHERE type='table'");
@@ -1055,6 +974,8 @@
       }
     }catch(_){}
 
+    // Heuristic: find tables that look like safehouse storage.
+    // We look for columns that include x/y/w/h OR x1/y1/x2/y2 and table name containing "safe".
     const found = [];
     for (const t of tables){
       let cols = [];
@@ -1072,15 +993,17 @@
       const looksSafe = nameL.includes("safe") || cols.some(c => c.includes("safe"));
       if (!(looksSafe && (hasXYWH || hasX1Y1X2Y2))) continue;
 
+      // Try to extract rows
       try{
         const escT = "'" + t.replace(/'/g,"''") + "'";
-        const res = db.exec("SELECT * FROM " + escT + " LIMIT 200");
+        let q = "SELECT * FROM " + escT + " LIMIT 200";
+        const res = db.exec(q);
         if (!res || !res[0] || !res[0].values) continue;
 
         const columns = res[0].columns.map(c => c.toLowerCase());
         const rows = res[0].values;
-        const ix = (n) => columns.indexOf(n);
 
+        const ix = (n) => columns.indexOf(n);
         const iX = ix("x"), iY = ix("y");
         const iW = ix("w"), iH = ix("h");
         const iWidth = ix("width"), iHeight = ix("height");
@@ -1103,6 +1026,8 @@
           }
 
           if (![x0,y0,x1,y1].every(n => Number.isFinite(n))) continue;
+
+          // sanity: within the world-ish
           if (Math.abs(x0) > 500000 || Math.abs(y0) > 500000) continue;
           if (Math.abs(x1) > 500000 || Math.abs(y1) > 500000) continue;
 
@@ -1111,6 +1036,7 @@
       }catch(_){}
     }
 
+    // Merge + de-dupe by string
     const uniq = new Map();
     for (const r of found){
       const k = r.cx0 + "," + r.cy0 + "," + r.cx1 + "," + r.cy1;
@@ -1130,170 +1056,101 @@
     }
   }
 
-  // Keep json
-  function exportKeepJson(){
-    const payload = {
-      version: 1,
-      brand: "HDRcade PZ B42 Map Cleaner",
-      createdUtc: new Date().toISOString(),
-      manualRects: S.keep.manualRects,
-      presetRects: S.keep.presetRects,
-      safehouseRects: S.keep.safehouseRects,
-      note: "Cell rects are inclusive ranges in cell coordinates (cell is 300x300 tiles)."
-    };
-    const blob = new Blob([JSON.stringify(payload,null,2)], {type:"application/json"});
+  // ---- Selection / rects ----
+  function rebuildSelection(){
+    S.selectedSet.clear();
+    if (S.selectedRects.length === 0) return;
+
+    for (const r of S.selectedRects){
+      const minX = Math.floor(Math.min(r.x0,r.x1));
+      const maxX = Math.floor(Math.max(r.x0,r.x1) - 1e-9);
+      const minY = Math.floor(Math.min(r.y0,r.y1));
+      const maxY = Math.floor(Math.max(r.y0,r.y1) - 1e-9);
+
+      for (let x=minX; x<=maxX; x++){
+        for (let y=minY; y<=maxY; y++){
+          const k = key(x,y);
+          if (S.binSet.has(k)) S.selectedSet.add(k);
+        }
+      }
+    }
+    updateStats();
+  }
+
+  function addRectFromPaste(){
+    const pts = parseCoords(coordsPaste.value);
+    if (pts.length < 2){ log("Paste coords: need 2 points."); return; }
+
+    const a = pts[0], b = pts[1];
+    const minX = Math.min(a[0], b[0]);
+    const minY = Math.min(a[1], b[1]);
+    const maxX = Math.max(a[0], b[0]);
+    const maxY = Math.max(a[1], b[1]);
+
+    const p0 = tileToBinFloor(minX, minY);
+    const p1 = tileToBinFloor(maxX, maxY);
+
+    const r = { x0: p0.bx, y0: p0.by, x1: p1.bx + 1, y1: p1.by + 1 };
+    S.selectedRects.push(r);
+    rebuildSelection();
+    log("Added selection rect. Selected bins: " + S.selectedSet.size);
+    setButtons();
+  }
+
+  function clearRects(){
+    S.selectedRects = [];
+    S.selectedSet.clear();
+    S.showOnlySelected = false;
+    updateStats();
+    log("Cleared selection rectangles.");
+    setButtons();
+  }
+
+  // ---- Export / delete ----
+  function exportDeleteScript(){
+    const keys = Array.from(S.selectedSet);
+    if (keys.length === 0){ log("Nothing selected."); return; }
+
+    const linesBat = [
+      "@echo off",
+      "REM HDRcade PZ B42 Map Cleaner - delete selected map bins",
+      "REM Run from the SAVE folder that contains the 'map' directory",
+      "REM Always back up first.",
+      ""
+    ];
+    const linesSh = [
+      "#!/usr/bin/env bash",
+      "# HDRcade PZ B42 Map Cleaner - delete selected map bins",
+      "# Run from the SAVE folder that contains the 'map' directory",
+      "# Always back up first.",
+      "",
+      "set -euo pipefail",
+      ""
+    ];
+
+    for (const k of keys){
+      const [x,y] = k.split(",");
+      linesBat.push('del /q "map\\\\' + x + '\\\\' + y + '.bin"');
+      linesSh.push('rm -f "map/' + x + '/' + y + '.bin"');
+    }
+
+    const blob = new Blob([linesBat.join("\r\n") + "\r\n\r\n" + linesSh.join("\n") + "\n"], {type:"text/plain"});
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "HDRcade_keep_cells.json";
+    a.download = "HDRcade_PZ_B42_delete_selected_bins.txt";
     a.click();
-    log("Exported keep list JSON.");
-  }
-  async function importKeepJson(file){
-    try{
-      const txt = await file.text();
-      const obj = JSON.parse(txt);
-      if (!obj || typeof obj !== "object") throw new Error("Invalid JSON.");
-      if (Array.isArray(obj.manualRects)) S.keep.manualRects = obj.manualRects;
-      if (Array.isArray(obj.presetRects)) S.keep.presetRects = obj.presetRects;
-      if (Array.isArray(obj.safehouseRects)) S.keep.safehouseRects = obj.safehouseRects;
-      updateKeepCounts();
-      S.keep.dirty = true;
-      log("Imported keep list JSON.");
-    }catch(e){
-      log("Import failed: " + (e && e.message ? e.message : e));
-    }
+    log("Exported delete script.");
   }
 
-  // OS export modal
-  function openOSModal(){ osModal.style.display = "flex"; }
-  function closeOSModal(){ osModal.style.display = "none"; }
-  function getOSPref(){ return localStorage.getItem("HDRcade_ExportOS") || ""; }
-  function setOSPref(v){ localStorage.setItem("HDRcade_ExportOS", v); }
-
-  function buildDeleteList(){
-    return Array.from(S.selectedSet).map(k => {
-      const parts = k.split(",");
-      return { x: parts[0], y: parts[1] };
-    });
-  }
-  function buildWindowsScript(deleteList, dryRun){
-    const lines = [];
-    lines.push("@echo off");
-    lines.push("setlocal");
-    lines.push("echo HDRcade PZ B42 Map Cleaner");
-    lines.push("echo.");
-    lines.push("echo IMPORTANT:");
-    lines.push("echo Run this file from your SAVE ROOT directory (the folder that contains ^"map^\^" ).");
-    lines.push("echo Stop the server first and make a backup.");
-    lines.push("echo.");
-    lines.push("if not exist map (");
-    lines.push("  echo ERROR: map folder not found in current directory.");
-    lines.push("  echo Place this script in the SAVE ROOT folder and run again.");
-    lines.push("  pause");
-    lines.push("  exit /b 1");
-    lines.push(")");
-    lines.push("echo.");
-    lines.push("echo This will " + (dryRun ? "PRINT" : "DELETE") + " " + deleteList.length + " map bin file(s).");
-    lines.push("echo.");
-    lines.push("set /p CONFIRM=Type DELETE to continue: ");
-    lines.push("if /I not "%CONFIRM%"=="DELETE" (");
-    lines.push("  echo Cancelled.");
-    lines.push("  pause");
-    lines.push("  exit /b 2");
-    lines.push(")");
-    lines.push("echo.");
-    if (dryRun){
-      lines.push("echo DRY-RUN MODE: no files will be deleted.");
-      lines.push("echo.");
-      for (const it of deleteList){
-        lines.push("echo del /q "map\\" + it.x + "\\" + it.y + ".bin"");
-      }
-    } else {
-      for (const it of deleteList){
-        lines.push("del /q "map\\" + it.x + "\\" + it.y + ".bin"");
-      }
-    }
-    lines.push("echo.");
-    lines.push("echo Done.");
-    lines.push("pause");
-    return lines.join("\r\n") + "\r\n";
-  }
-  function buildLinuxScript(deleteList, dryRun){
-    const lines = [];
-    lines.push("#!/usr/bin/env bash");
-    lines.push("set -euo pipefail");
-    lines.push("echo "HDRcade PZ B42 Map Cleaner"");
-    lines.push("echo");
-    lines.push("echo "IMPORTANT:"");
-    lines.push("echo "Run this script from your SAVE ROOT directory (the folder that contains 'map/')."");
-    lines.push("echo "Stop the server first and make a backup."");
-    lines.push("echo");
-    lines.push("if [ ! -d "map" ]; then");
-    lines.push("  echo "ERROR: map folder not found in current directory."");
-    lines.push("  echo "Place this script in the SAVE ROOT folder and run again."");
-    lines.push("  exit 1");
-    lines.push("fi");
-    lines.push("echo");
-    lines.push("echo "This will " + (dryRun ? "PRINT" : "DELETE") + " " + deleteList.length + " map bin file(s)."");
-    lines.push("echo");
-    lines.push("read -r -p "Type DELETE to continue: " CONFIRM");
-    lines.push("if [ "${CONFIRM}" != "DELETE" ]; then");
-    lines.push("  echo "Cancelled."");
-    lines.push("  exit 2");
-    lines.push("fi");
-    lines.push("echo");
-    if (dryRun){
-      lines.push("echo "DRY-RUN MODE: no files will be deleted."");
-      lines.push("echo");
-      for (const it of deleteList){
-        lines.push("echo rm -f "map/" + it.x + "/" + it.y + ".bin"");
-      }
-    } else {
-      for (const it of deleteList){
-        lines.push("rm -f "map/" + it.x + "/" + it.y + ".bin"");
-      }
-    }
-    lines.push("echo");
-    lines.push("echo "Done."");
-    return lines.join("\n") + "\n";
-  }
-  function downloadTextFile(filename, content){
-    const blob = new Blob([content], {type:"text/plain"});
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    a.click();
-  }
-  function exportScript(os){
-    const deleteList = buildDeleteList();
-    if (deleteList.length === 0){ log("Export: nothing selected."); return; }
-    const dryRun = exportDryRun.checked === true;
-    if (rememberOS.checked) setOSPref(os);
-
-    if (os === "windows"){
-      const content = buildWindowsScript(deleteList, dryRun);
-      downloadTextFile(dryRun ? "HDRcade_Delete_MapBins_DRYRUN.bat" : "HDRcade_Delete_MapBins.bat", content);
-      log("Exported Windows script (" + (dryRun ? "dry-run" : "delete") + ").");
-    }else{
-      const content = buildLinuxScript(deleteList, dryRun);
-      downloadTextFile(dryRun ? "HDRcade_Delete_MapBins_DRYRUN.sh" : "HDRcade_Delete_MapBins.sh", content);
-      log("Exported Linux script (" + (dryRun ? "dry-run" : "delete") + ").");
-    }
-  }
-  function exportScriptFlow(){
-    const pref = getOSPref();
-    if (pref === "windows" || pref === "linux"){ exportScript(pref); return; }
-    openOSModal();
-  }
-
-  // Direct delete (RW)
   async function deleteSelectedBins(){
     if (!S.writeAccess || !S.mapHandle){ log("Delete requires read/write folder access."); return; }
     const keys = Array.from(S.selectedSet);
     if (keys.length === 0){ log("Nothing selected."); return; }
+
     const typed = prompt("About to delete " + keys.length + " map bin files.\nType DELETE to confirm.");
     if (typed !== "DELETE") return;
 
+    // group by x
     const byX = new Map();
     for (const k of keys){
       const [xs, ys] = k.split(",");
@@ -1315,6 +1172,7 @@
       }
     }
 
+    // rebuild bins + bounds
     S.bins = [];
     S.bounds = null;
     for (const k of S.binSet){
@@ -1333,12 +1191,51 @@
     S.selectedRects = [];
     S.selectedSet.clear();
     updateStats();
+
+    // keep sets changed
     S.keep.dirty = true;
+
     log("Deleted bins: " + deleted);
     setButtons();
   }
 
-  // Grid drawing
+  // ---- Keep import/export ----
+  function exportKeepJson(){
+    const payload = {
+      version: 1,
+      brand: "HDRcade PZ B42 Map Cleaner",
+      manualRects: S.keep.manualRects,
+      presetRects: S.keep.presetRects,
+      safehouseRects: S.keep.safehouseRects, // optional; may be empty
+      notes: "Cells are 300x300 tiles. Rects are inclusive cell ranges."
+    };
+    const blob = new Blob([JSON.stringify(payload,null,2)], {type:"application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "HDRcade_keep_cells.json";
+    a.click();
+    log("Exported keep list JSON.");
+  }
+
+  async function importKeepJson(file){
+    try{
+      const txt = await file.text();
+      const obj = JSON.parse(txt);
+      if (!obj || typeof obj !== "object") throw new Error("Invalid JSON.");
+
+      if (Array.isArray(obj.manualRects)) S.keep.manualRects = obj.manualRects;
+      if (Array.isArray(obj.presetRects)) S.keep.presetRects = obj.presetRects;
+      if (Array.isArray(obj.safehouseRects)) S.keep.safehouseRects = obj.safehouseRects;
+
+      updateKeepCounts();
+      S.keep.dirty = true;
+      log("Imported keep list JSON.");
+    }catch(e){
+      log("Import failed: " + (e && e.message ? e.message : e));
+    }
+  }
+
+  // ---- Grid drawing ----
   function getGridTileStep(){
     const t = gridType.value;
     if (t === "bin8") return 8;
@@ -1346,6 +1243,7 @@
     const v = Number(gridTileSpacing.value);
     return Number.isFinite(v) && v > 0 ? v : 100;
   }
+
   function drawGrid(){
     if (!gridOn.checked) return;
     const minZoom = Number(gridMinZoom.value) || 0;
@@ -1354,6 +1252,7 @@
     const tileStep = getGridTileStep();
     const alpha = Number(gridOpacity.value) || 0.30;
 
+    // visible bounds in world bins
     const tl = screenToWorld(0,0);
     const br = screenToWorld(cv.width, cv.height);
 
@@ -1362,6 +1261,7 @@
     const minBY = Math.min(tl.by, br.by);
     const maxBY = Math.max(tl.by, br.by);
 
+    // align by tiles (tile = bin*8)
     const minTX = minBX * 8;
     const maxTX = maxBX * 8;
     const minTY = minBY * 8;
@@ -1372,9 +1272,12 @@
 
     ctx.save();
     ctx.globalAlpha = alpha;
+
     const thick = (tileStep === 300) ? Math.max(1.2, Math.min(2.4, S.view.scale * 0.06))
                                      : Math.max(1.0, Math.min(2.0, S.view.scale * 0.05));
     ctx.lineWidth = thick;
+
+    // cell grid slightly warmer
     ctx.strokeStyle = (tileStep === 300) ? "rgba(255, 214, 96, 0.92)" : "rgba(150, 200, 255, 0.88)";
 
     for (let tx = startTX; tx <= maxTX + tileStep; tx += tileStep){
@@ -1392,9 +1295,11 @@
     ctx.restore();
   }
 
+  // ---- Rendering ----
   function draw(){
     ctx.clearRect(0,0,cv.width,cv.height);
 
+    // Basemap
     if (S.bg.img){
       ctx.save();
       ctx.globalAlpha = S.bg.opacity;
@@ -1415,10 +1320,13 @@
       ctx.restore();
     }
 
+    // Grid
     drawGrid();
 
+    // Ensure keep bins are ready if needed for heatmap
     if (S.keep.enabled && S.keep.dirty) rebuildKeepBins();
 
+    // Bin dots (culling)
     const scale = S.view.scale;
     const size = Math.max(1, Math.floor(scale));
     const showOnlySel = S.showOnlySelected && S.selectedSet.size > 0;
@@ -1437,11 +1345,16 @@
       const isSel = S.selectedSet.has(k);
       if (showOnlySel && !isSel) continue;
 
-      let col = "rgba(110,168,255,0.60)";
+      let col = "rgba(110,168,255,0.60)"; // default blue
+
       if (heatmapOn.checked && S.keep.enabled){
+        // heatmap: green kept, red would-delete
         col = wouldDeleteKey(k) ? "rgba(255,92,92,0.45)" : "rgba(92,255,178,0.38)";
       }
-      if (isSel){ col = "rgba(255,200,120,0.88)"; }
+
+      if (isSel){
+        col = "rgba(255,200,120,0.88)";
+      }
 
       const p = worldToScreen(b.x, b.y);
       const px = Math.round(p.x - size/2);
@@ -1450,6 +1363,7 @@
       ctx.fillRect(px, py, size, size);
     }
 
+    // Selection rectangles
     ctx.save();
     ctx.lineWidth = Math.max(1, Math.min(2, scale*0.08));
     ctx.strokeStyle = "rgba(255,200,120,0.85)";
@@ -1471,8 +1385,14 @@
     }
     ctx.restore();
 
+    // HUD
     const tileX = S.hover.bxf * 8;
     const tileY = S.hover.byf * 8;
+
+    const keepInfo = (S.keep.enabled)
+      ? (" · keepBins=" + (S.keep.keepBinSet ? S.keep.keepBinSet.size : 0))
+      : "";
+
     hud.innerHTML =
       "<b>HDRcade</b> · hover " +
       (gridLabels.checked
@@ -1482,7 +1402,7 @@
       " · zoom=" + S.view.scale.toFixed(2) +
       " · rects=" + S.selectedRects.length +
       " · selected=" + S.selectedSet.size +
-      (S.keep.enabled ? (" · keepBins=" + S.keep.keepBinSet.size) : "") +
+      keepInfo +
       "<div style='margin-top:6px;'>" +
       "<span class='kbd'>Shift</span>+<span class='kbd'>Drag</span> select &nbsp; <span class='kbd'>Drag</span> pan &nbsp; <span class='kbd'>Wheel</span> zoom" +
       "</div>";
@@ -1490,12 +1410,14 @@
     requestAnimationFrame(draw);
   }
 
+  // ---- Interaction ----
   function onWheel(e){
     e.preventDefault();
     const rect = cv.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
     const mx = (e.clientX - rect.left) * dpr;
     const my = (e.clientY - rect.top) * dpr;
+
     const before = screenToWorld(mx, my);
     const factor = Math.exp(-Math.sign(e.deltaY) * 0.18);
     S.view.scale = clamp(S.view.scale * factor, 0.05, 240);
@@ -1509,10 +1431,12 @@
     const dpr = window.devicePixelRatio || 1;
     const sx = (e.clientX - rect.left) * dpr;
     const sy = (e.clientY - rect.top) * dpr;
+
     S.drag.active = true;
     S.drag.sx = sx; S.drag.sy = sy;
     S.drag.startCx = S.view.cx;
     S.drag.startCy = S.view.cy;
+
     if (e.shiftKey){
       S.drag.mode = "select";
       const w = screenToWorld(sx,sy);
@@ -1528,10 +1452,13 @@
     const dpr = window.devicePixelRatio || 1;
     const sx = (e.clientX - rect.left) * dpr;
     const sy = (e.clientY - rect.top) * dpr;
+
     const w = screenToWorld(sx,sy);
     S.hover.bxf = w.bx;
     S.hover.byf = w.by;
+
     if (!S.drag.active) return;
+
     if (S.drag.mode === "pan"){
       const dx = (sx - S.drag.sx) / S.view.scale;
       const dy = (sy - S.drag.sy) / S.view.scale;
@@ -1545,20 +1472,24 @@
 
   function onUp(e){
     if (!S.drag.active) return;
+
     if (S.drag.mode === "select" && S.drag.rect){
       const r = S.drag.rect;
       const minX = Math.min(r.x0,r.x1);
       const minY = Math.min(r.y0,r.y1);
       const maxX = Math.max(r.x0,r.x1);
       const maxY = Math.max(r.y0,r.y1);
+
       const rectBin = { x0:minX, y0:minY, x1:maxX, y1:maxY };
       if (Math.abs(rectBin.x1-rectBin.x0) < 0.01) rectBin.x1 = rectBin.x0 + 1;
       if (Math.abs(rectBin.y1-rectBin.y0) < 0.01) rectBin.y1 = rectBin.y0 + 1;
+
       S.selectedRects.push(rectBin);
       rebuildSelection();
       log("Selected bins: " + S.selectedSet.size);
       setButtons();
     }
+
     S.drag.active = false;
     S.drag.mode = "pan";
     S.drag.rect = null;
@@ -1570,12 +1501,18 @@
   cv.addEventListener("pointerup", onUp);
   cv.addEventListener("pointercancel", onUp);
 
-  // UI wiring
+  // ---- Wire UI ----
   btnPickRW.addEventListener("click", loadFromDirectoryRW);
   btnPickRO.addEventListener("click", () => roInput.click());
-  roInput.addEventListener("change", () => { if (roInput.files && roInput.files.length) loadFromFileInputRO(roInput.files); });
+  roInput.addEventListener("change", () => {
+    if (roInput.files && roInput.files.length) loadFromFileInputRO(roInput.files);
+  });
 
-  btnReloadMap.addEventListener("click", async () => { await autoLoadMapImage(); setButtons(); });
+  btnReloadMap.addEventListener("click", async () => {
+    await autoLoadMapImage();
+    setButtons();
+  });
+
   btnBgFile.addEventListener("click", () => bgFileInput.click());
   bgFileInput.addEventListener("change", () => {
     const f = bgFileInput.files && bgFileInput.files[0];
@@ -1593,12 +1530,18 @@
   btnApplyCornerLock.addEventListener("click", () => applyCornerLockFromInputs(false));
   btnFitToBins.addEventListener("click", fitBasemapToBinsRough);
 
+  // Keep toggles
   keepEnabled.addEventListener("change", () => {
     S.keep.enabled = !!keepEnabled.checked;
     S.keep.dirty = true;
     log("Keep Cells: " + (S.keep.enabled ? "enabled" : "disabled"));
     setButtons();
   });
+
+  heatmapOn.addEventListener("change", () => {
+    log("Dry-run heatmap: " + (heatmapOn.checked ? "on" : "off"));
+  });
+
   btnApplyInverse.addEventListener("click", applyInverseSelectionFromKeep);
 
   btnKeepParse.addEventListener("click", () => {
@@ -1639,7 +1582,11 @@
     setButtons();
   });
 
-  safehouseAuto.addEventListener("change", () => { S.keep.dirty = true; log("Auto-protect safehouses: " + (safehouseAuto.checked ? "on" : "off")); });
+  safehouseAuto.addEventListener("change", () => {
+    S.keep.dirty = true;
+    log("Auto-protect safehouses: " + (safehouseAuto.checked ? "on" : "off"));
+  });
+
   btnScanSafehouses.addEventListener("click", scanSafehouses);
 
   btnKeepExport.addEventListener("click", exportKeepJson);
@@ -1653,151 +1600,23 @@
 
   btnAddRect.addEventListener("click", addRectFromPaste);
   btnClearRects.addEventListener("click", clearRects);
-  btnPreview.addEventListener("click", () => { S.showOnlySelected = !S.showOnlySelected; log(S.showOnlySelected ? "Showing only selected bins." : "Showing all bins."); });
 
-  btnExportDeleteScript.addEventListener("click", exportScriptFlow);
+  btnPreview.addEventListener("click", () => {
+    S.showOnlySelected = !S.showOnlySelected;
+    log(S.showOnlySelected ? "Showing only selected bins." : "Showing all bins.");
+  });
+
+  btnExportDeleteScript.addEventListener("click", exportDeleteScript);
   btnDelete.addEventListener("click", deleteSelectedBins);
 
-  btnCloseOS.addEventListener("click", closeOSModal);
-  btnExportWin.addEventListener("click", () => { closeOSModal(); exportScript("windows"); });
-  btnExportLinux.addEventListener("click", () => { closeOSModal(); exportScript("linux"); });
-  osModal.addEventListener("click", (e) => { if (e.target === osModal) closeOSModal(); });
-
-  btnOpenGuide.addEventListener("click", () => { guideModal.style.display = "flex"; });
-  btnCloseGuide.addEventListener("click", () => { guideModal.style.display = "none"; });
-  guideModal.addEventListener("click", (e) => { if (e.target === guideModal) guideModal.style.display = "none"; });
-
-  // Init
+  // ---- init ----
   updateStats();
   updateKeepCounts();
   setButtons();
   log("Ready. Put map.jpg (or map.png/webp/jpeg) next to index.html to auto-load it.");
-  autoLoadMapImage();
-  ensureSql().then(ok => {
-    btnScanSafehouses.disabled = !ok;
-    safehouseStatus.textContent = ok ? "Safehouses: ready to scan (players.db)." : "Safehouses: SQL engine unavailable (offline/CDN blocked).";
-  });
-
+  autoLoadMapImage(); // attempt on startup
   requestAnimationFrame(draw);
 })();
-
-
-/* === HDRcade Fix Pack v2 (Jan 2026) ===
-   Fixes:
-   - Tooltip fix is injected INSIDE a <script> tag (prevents it rendering as page text)
-   - Basemap autoload is file:// safe (no ?t=) and logs a HEAD probe for map.jpg
-*/
-(function(){
-  function _fallbackLog(msg){
-    try{
-      var el = document.getElementById("log");
-      if(!el) return;
-      var t = new Date().toISOString().slice(11,19);
-      el.textContent = "["+t+"] " + msg + "\\n" + el.textContent;
-    }catch(_){}
-  }
-  function LOG(msg){
-    try{
-      if (typeof window.log === "function") window.log(msg);
-      else _fallbackLog(msg);
-    }catch(_){ _fallbackLog(msg); }
-  }
-
-  function addCacheBust(url){
-    try{
-      if (!url) return url;
-      if (String(url).startsWith("blob:")) return url;
-      if (location && location.protocol === "file:") return url;
-      var sep = String(url).includes("?") ? "&" : "?";
-      return url + sep + "t=" + Date.now();
-    }catch(_){
-      return url;
-    }
-  }
-  window.HDRCADE_addCacheBust = addCacheBust;
-
-  function tooltipFix(){
-    var box = document.getElementById("tooltipBox");
-    if(!box){ LOG("TooltipBox missing."); return; }
-    box.style.pointerEvents = "auto";
-    var pinned = false;
-
-    function setContent(el){
-      var raw = el.getAttribute("data-tip") || "";
-      box.innerHTML = raw.replace(/\\n/g,"<br>");
-    }
-    function position(el){
-      var r = el.getBoundingClientRect();
-      var pad = 10, maxW = 360, approxH = 180;
-      var x = r.left, y = r.bottom + 8;
-      if (x + maxW > window.innerWidth - pad) x = window.innerWidth - pad - maxW;
-      if (y + approxH > window.innerHeight - pad) y = r.top - approxH - 8;
-      box.style.left = Math.max(pad,x) + "px";
-      box.style.top  = Math.max(pad,y) + "px";
-    }
-    function show(el){ setContent(el); position(el); box.style.display="block"; }
-    function hide(){ if(!pinned) box.style.display="none"; }
-
-    document.querySelectorAll(".tip").forEach(function(el){
-      el.addEventListener("mouseenter", function(){ if(!pinned) show(el); });
-      el.addEventListener("mouseleave", hide);
-      el.addEventListener("click", function(e){
-        e.preventDefault(); e.stopPropagation();
-        pinned = !pinned;
-        if(pinned) show(el); else box.style.display="none";
-      }, {passive:false});
-      el.addEventListener("touchstart", function(e){
-        e.preventDefault(); e.stopPropagation();
-        pinned = !pinned;
-        if(pinned) show(el); else box.style.display="none";
-      }, {passive:false});
-    });
-    document.addEventListener("click", function(){ pinned=false; box.style.display="none"; });
-    window.addEventListener("scroll", function(){ if(!pinned) box.style.display="none"; }, {passive:true});
-    window.addEventListener("resize", function(){ if(!pinned) box.style.display="none"; });
-
-    LOG("Tooltip fix bound (" + document.querySelectorAll(".tip").length + " tips).");
-  }
-
-  async function probeAndLoad(){
-    var candidates = ["map.jpg","./map.jpg","map.jpeg","./map.jpeg","map.png","./map.png","map.webp","./map.webp"];
-    try{
-      try{
-        var res = await fetch("map.jpg", {method:"HEAD", cache:"no-store"});
-        LOG("map.jpg HEAD: " + res.status);
-      }catch(e){
-        LOG("map.jpg HEAD failed (ok on file://): " + (e && e.message ? e.message : e));
-      }
-
-      for (var i=0;i<candidates.length;i++){
-        var url = candidates[i];
-        var img = new Image();
-        var ok = await new Promise(function(resolve){
-          img.onload = function(){ resolve(true); };
-          img.onerror = function(){ resolve(false); };
-          img.src = addCacheBust(url);
-        });
-        if(ok){
-          if (typeof window.setBasemapImage === "function") {
-            window.setBasemapImage(img, url);
-            LOG("Basemap applied via setBasemapImage: " + url);
-          } else {
-            LOG("Basemap loaded (no hook found): " + url + " ("+img.naturalWidth+"x"+img.naturalHeight+")");
-          }
-          break;
-        }
-      }
-    }catch(e){
-      LOG("Basemap helper error: " + (e && e.message ? e.message : e));
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", function(){
-    tooltipFix();
-    probeAndLoad();
-  });
-})();
-
 </script>
 </body>
 </html>
