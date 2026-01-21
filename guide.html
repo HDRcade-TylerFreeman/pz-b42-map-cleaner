@@ -1,105 +1,42 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>HDRcade PZ B42 Map Cleaner — Guide</title>
   <style>
-    :root{
-      --bg:#070a10; --text:#e7eefc; --muted:#9fb0d0; --line:rgba(255,255,255,.10);
-      --accent:#6ea8ff; --warn:#ffb86b; --danger:#ff5c5c; --ok:#5cffb2;
-      --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
-      --sans:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
-    }
-    html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans)}
-    .wrap{max-width:980px;margin:0 auto;padding:18px 16px 40px}
-    h1{font-size:20px;margin:0 0 8px}
-    .sub{color:var(--muted);font-size:12px;margin-bottom:16px}
-    .card{border:1px solid var(--line);border-radius:14px;padding:14px 14px;margin:12px 0;background:rgba(255,255,255,.02)}
-    h2{font-size:15px;margin:0 0 8px}
-    p,li{color:rgba(231,238,252,.90);font-size:13px;line-height:1.5}
-    code{font-family:var(--mono);font-size:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);padding:1px 6px;border-radius:8px}
-    .warn{border-color:rgba(255,184,107,.25);background:rgba(255,184,107,.08)}
-    .danger{border-color:rgba(255,92,92,.25);background:rgba(255,92,92,.08)}
-    .ok{border-color:rgba(92,255,178,.22);background:rgba(92,255,178,.06)}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    @media (max-width:800px){.grid{grid-template-columns:1fr}}
-    a{color:var(--accent);text-decoration:none}
-    a:hover{text-decoration:underline}
-    .small{font-size:12px;color:var(--muted)}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif; line-height:1.45; margin:20px; max-width:900px}
+    code{background:#f3f4f6; padding:2px 6px; border-radius:8px}
+    h1{margin-top:0}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>HDRcade PZ B42 Map Cleaner (42.13+) — Guide</h1>
-    <div class="sub">Written for tired admins at 3am: simple, safe, and blunt.</div>
+  <h1>HDRcade PZ B42 Map Cleaner (42.13+) — Guide</h1>
+  <p>This tool deletes <b>only</b> map bin files: <code>map/&lt;binX&gt;/&lt;binY&gt;.bin</code></p>
 
-    <div class="card ok">
-      <h2>What this tool does</h2>
-      <p>Project Zomboid stores the world in small map files called <b>bins</b> (files ending in <code>.bin</code>).</p>
-      <p>When you delete a bin file, the game will regenerate that area the next time someone visits it.</p>
-    </div>
+  <h2>Safe workflow</h2>
+  <ol>
+    <li>Stop your server</li>
+    <li>Back up the save folder</li>
+    <li>Load the save folder (the folder containing <code>map/</code>)</li>
+    <li>Draw rectangles / or set Keep Cells</li>
+    <li>Use Dry-run heatmap to review</li>
+    <li>Export a script and run it from the save root</li>
+    <li>Restart server</li>
+  </ol>
 
-    <div class="card warn">
-      <h2>Safe workflow (do this every time)</h2>
-      <ol>
-        <li><b>Stop the server</b></li>
-        <li><b>Back up the save folder</b> (copy the entire save somewhere safe)</li>
-        <li>Load the save folder (the folder containing <code>map/</code>)</li>
-        <li>Use <b>Keep Cells</b> to protect towns/bases</li>
-        <li>Check <b>Dry-run heatmap</b> (green kept, red would delete)</li>
-        <li>Export a script (<code>.bat</code>/<code>.sh</code>) or delete directly</li>
-        <li>Restart the server</li>
-      </ol>
-    </div>
+  <h2>Basemap</h2>
+  <p>Put <code>map.jpg</code> next to <code>index.html</code>.</p>
+  <ul>
+    <li>On GitHub Pages, file names are case-sensitive: it must be exactly <code>map.jpg</code>.</li>
+    <li>Corner lock TR/BL is ON by default and assumes HDRcade’s map extents.</li>
+  </ul>
 
-    <div class="card">
-      <h2>Terms (simple)</h2>
-      <div class="grid">
-        <div>
-          <p><b>Tile</b> — a single coordinate in the world (what b42map shows).</p>
-          <p><b>Bin</b> — a file covering <b>8×8 tiles</b>. Stored as <code>map/&lt;binX&gt;/&lt;binY&gt;.bin</code>.</p>
-        </div>
-        <div>
-          <p><b>Cell</b> — a larger grid area of <b>300×300 tiles</b>. Great for “keep these towns”.</p>
-          <p><b>Keep Cells</b> — list the cells to keep, then delete everything else.</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Where to run exported scripts</h2>
-      <p>The script must be run from your <b>Save root directory</b> — the folder that contains <code>map/</code>.</p>
-      <p class="small">The exported scripts refuse to run if <code>map/</code> is missing. This prevents “ran it in the wrong folder” disasters.</p>
-    </div>
-
-    <div class="card">
-      <h2>Safehouses (auto-protect)</h2>
-      <p>The tool can attempt to read <code>players.db</code> and detect safehouse regions. This is <b>best-effort</b> because schemas vary.</p>
-      <p class="small">Always double-check visually using the heatmap.</p>
-    </div>
-
-    <div class="card danger">
-      <h2>Common mistakes</h2>
-      <ul>
-        <li>Deleting map files while the server is running</li>
-        <li>Running scripts from the wrong folder (not the save root)</li>
-        <li>Not checking the heatmap before deleting</li>
-        <li>Forgetting to protect bases / towns / safehouses</li>
-      </ul>
-    </div>
-
-    <div class="card">
-      <h2>HDRcade links</h2>
-      <ul>
-        <li><a href="https://steamcommunity.com/id/HDRcade/myworkshopfiles/?appid=108600" target="_blank" rel="noopener">Steam Workshop</a></li>
-        <li><a href="https://patreon.com/HDRcade" target="_blank" rel="noopener">Patreon</a></li>
-        <li><a href="https://ko-fi.com/HDRcade" target="_blank" rel="noopener">Ko-fi</a></li>
-        <li><a href="https://pine.host/hdrcade" target="_blank" rel="noopener">Pine hosting</a></li>
-      </ul>
-    </div>
-
-    <div class="sub">Tip: host free on GitHub Pages (index.html + guide.html + optional map.jpg).</div>
-  </div>
+  <h2>Terminology</h2>
+  <ul>
+    <li><b>Tile</b>: world coordinate (what b42map shows)</li>
+    <li><b>Bin</b>: 8×8 tiles stored as one <code>.bin</code></li>
+    <li><b>Cell</b>: 300×300 tiles</li>
+  </ul>
 </body>
 </html>
