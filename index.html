@@ -1,1361 +1,1197 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>HDRcade PZ B42 Map Cleaner (42.13+)</title>
-  <style>
-    :root{
-      --bg:#0b0f16; --panel:#0f1624; --panel2:#111b2c; --text:#e7eefc; --muted:#a9b7d6;
-      --line: rgba(255,255,255,.12);
-      --btn:#1b2a44; --btn2:#23365a;
-      --danger: rgba(122,31,42,.25);
-      --danger2: rgba(122,31,42,.35);
-      --accent:#7aa7ff;
-      --ok:#2cff8d;
-      --warn:#ffd44a;
-      --bad:#ff3b57;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%; margin:0; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;}
-    a{color:var(--accent); text-decoration:none}
-    a:hover{text-decoration:underline}
-    .wrap{display:flex; height:100vh; overflow:hidden}
-    .side{width:360px; max-width:92vw; overflow:auto; border-right:1px solid var(--line); background:linear-gradient(180deg,var(--panel),var(--panel2)); padding:16px}
-    .main{flex:1; position:relative; overflow:hidden}
-    h1{font-size:18px; margin:0 0 6px 0}
-    .sub{color:var(--muted); font-size:12px; margin-bottom:10px}
-    .links{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px}
-    .pill{display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border:1px solid var(--line); border-radius:999px; background:rgba(255,255,255,.03); font-size:12px}
-    .sec{border:1px solid var(--line); border-radius:14px; padding:12px; margin:12px 0; background:rgba(0,0,0,.18)}
-    .sec h2{display:flex; align-items:center; justify-content:space-between; font-size:14px; margin:0 0 10px 0}
-    .row{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
-    button, select, input[type="text"], input[type="number"], textarea{
-      background:rgba(255,255,255,.04); color:var(--text); border:1px solid var(--line);
-      border-radius:12px; padding:10px 10px; font-size:13px;
-    }
-    button{cursor:pointer}
-    button:hover{background:rgba(255,255,255,.07)}
-    button.primary{background:var(--btn); border-color:rgba(122,167,255,.35)}
-    button.primary:hover{background:var(--btn2)}
-    button.danger{background:var(--danger); border-color:rgba(255,90,110,.35)}
-    button.danger:hover{background:var(--danger2)}
-    button:disabled{opacity:.5; cursor:not-allowed}
-    textarea{width:100%; min-height:88px; resize:vertical}
-    .stat{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px}
-    .chip{padding:6px 10px; border:1px solid var(--line); border-radius:999px; font-size:12px; color:var(--muted)}
-    .hint{color:var(--muted); font-size:12px; margin-top:6px; line-height:1.35}
-    .kv{display:grid; grid-template-columns:1fr 1fr; gap:8px}
-    .kv label{font-size:12px; color:var(--muted); display:block; margin-bottom:4px}
-    .kv input,.kv select{width:100%}
-    .canvasWrap{position:absolute; inset:0; background:#070a10}
-    canvas{position:absolute; inset:0; width:100%; height:100%}
-    .hud{
-      position:absolute; left:10px; bottom:10px; padding:8px 10px; border-radius:12px;
-      background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.12); font-size:12px; color:var(--muted)
-    }
-    .banner{
-      padding:8px 10px; border-radius:12px; border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,212,74,.10); color:#f9e8ab; font-size:12px; line-height:1.35;
-      margin-top:8px; display:none;
-    }
-    .banner strong{color:#fff}
-    .tooltipBox{
-      position:fixed; z-index:9999; display:none; max-width:360px;
-      padding:10px 11px; border-radius:12px; background:rgba(0,0,0,.86);
-      border:1px solid rgba(255,255,255,.14); font-size:11px; line-height:1.35;
-      pointer-events:auto;
-    }
-    .tip{display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:999px;
-      border:1px solid rgba(255,255,255,.18); color:var(--muted); background:rgba(255,255,255,.04); cursor:pointer; user-select:none;
-    }
-    .tip:hover{color:var(--text); border-color:rgba(122,167,255,.4)}
-    .modalBack{position:fixed; inset:0; background:rgba(0,0,0,.65); display:none; align-items:center; justify-content:center; z-index:10000}
-    .modal{width:min(620px,92vw); background:linear-gradient(180deg,var(--panel),var(--panel2)); border:1px solid var(--line); border-radius:16px; padding:14px}
-    .modal h3{margin:0 0 8px 0; font-size:14px}
-    .modal p{margin:0 0 10px 0; color:var(--muted); font-size:12px; line-height:1.35}
-    .log{width:100%; min-height:170px; white-space:pre-wrap; font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; font-size:11px}
-    code{background:rgba(255,255,255,.06); padding:1px 5px; border-radius:8px}
-    .legend{
-      position:absolute; top:12px; right:12px;
-      background:rgba(0,0,0,0.75);
-      border:1px solid rgba(255,255,255,0.18);
-      border-radius:14px;
-      padding:10px 12px;
-      font-size:12px;
-      color:#e7eefc;
-      z-index:5;
-      width:230px;
-      backdrop-filter: blur(4px);
-    }
-    .legend h4{margin:0 0 8px 0; font-size:13px; font-weight:600}
-    .legRow{display:flex; align-items:center; gap:8px; margin-bottom:6px}
-    .legRow.small{margin-top:6px; font-size:11px; color:var(--muted)}
-    .legend .legRow.tip{cursor:help}
-    .legend .legRow.tip:hover{background:rgba(255,255,255,0.06); border-radius:6px}
-    .legBox{width:16px; height:16px; border-radius:4px; flex:0 0 16px}
-    .legBox.grid{border:2px solid rgba(255,220,80,0.9)}
-    .legBox.heat1{background:rgba(255,60,60,0.25)}
-    .legBox.heat3{background:rgba(255,60,60,0.55)}
-    .legBox.sh{border:2px dashed rgba(0,255,140,0.9)}
-    .legBox.rect{border:2px solid rgba(255,220,80,0.9); background:rgba(255,220,80,0.15)}
-    .legBox.del{background:rgba(255,60,87,0.65)}
-    .legBox.bins{background:rgba(122,167,255,0.45)}
-    .mobile-only{display:none}
-    @media (max-width: 900px){
-      .legend{display:none;}
-      .mobile-only{display:inline-flex}
-    }
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>HDRcade PZ B42 Map Cleaner (42.13+)</title>
+<style>
+  :root{
+    --bg:#0b0f14; --panel:#0f1620; --panel2:#0d131c;
+    --text:#e6eef9; --muted:#9fb1c6; --border:#203044;
+    --accent:#57a6ff; --warn:#ffcc66;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%; margin:0; background:var(--bg); color:var(--text); font:14px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Noto Sans","Helvetica Neue",Arial;}
+  a{color:var(--accent); text-decoration:none}
+  a:hover{text-decoration:underline}
+  .app{display:grid; grid-template-columns:360px 1fr; height:100vh;}
+  .side{background:linear-gradient(180deg,var(--panel),var(--panel2)); border-right:1px solid var(--border); overflow:auto;}
+  .main{position:relative; overflow:hidden;}
+  .brand{padding:16px 16px 10px 16px; border-bottom:1px solid var(--border);}
+  .brand h1{font-size:18px; margin:0 0 6px 0;}
+  .pills{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;}
+  .pill{display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border:1px solid var(--border); border-radius:999px; background:rgba(255,255,255,0.03);}
+  .sec{padding:14px 16px; border-bottom:1px solid var(--border);}
+  .sec h2{font-size:14px; margin:0 0 8px 0; color:#d8e6ff; letter-spacing:.2px;}
+  .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:8px 0;}
+  label{color:var(--muted)}
+  input[type="number"], input[type="text"], textarea, select{
+    background:#0a111a; color:var(--text); border:1px solid var(--border);
+    border-radius:10px; padding:8px 10px; outline:none;
+  }
+  textarea{width:100%; min-height:82px; resize:vertical}
+  button{
+    background:#0a111a; color:var(--text); border:1px solid var(--border);
+    border-radius:12px; padding:9px 12px; cursor:pointer;
+  }
+  button:hover{border-color:#2f4a68}
+  button.primary{background:rgba(87,166,255,0.12); border-color:rgba(87,166,255,0.45);}
+  button.danger{background:rgba(255,80,80,0.10); border-color:rgba(255,80,80,0.45);}
+  .hint{color:var(--muted); font-size:12px; white-space:pre-line;}
+  .warn{color:var(--warn); font-size:12px; white-space:pre-line;}
+  .ok{color:#7dffbe; font-size:12px;}
+  .log{background:#070b10; border:1px solid var(--border); border-radius:12px; padding:10px; color:#cfe3ff; font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:12px; max-height:200px; overflow:auto;}
+  .canvasWrap{position:absolute; inset:0;}
+  canvas{display:block; width:100%; height:100%;}
+  .topBar{
+    position:absolute; left:12px; top:12px; right:12px;
+    display:flex; gap:10px; align-items:center; justify-content:space-between;
+    pointer-events:none;
+  }
+  .topBar > *{pointer-events:auto;}
+  .hud{
+    display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    background:rgba(10,17,26,0.85); border:1px solid var(--border);
+    border-radius:16px; padding:8px 12px;
+  }
+  .hud .kv{color:var(--muted); font-size:12px}
+  .hud .kv b{color:var(--text); font-weight:600}
+  .legend{
+    position:absolute; right:12px; bottom:12px; width:280px;
+    background:rgba(10,17,26,0.90); border:1px solid var(--border);
+    border-radius:16px; padding:10px 10px;
+  }
+  .legend h3{margin:0 0 8px 0; font-size:13px; color:#d8e6ff;}
+  .legRow{display:flex; gap:10px; align-items:flex-start; margin:6px 0; line-height:1.25;}
+  .legBox{width:16px; height:16px; border-radius:5px; border:1px solid rgba(255,255,255,0.25); flex:0 0 auto; margin-top:2px;}
+  .legTxt{color:var(--muted); font-size:12px;}
+  .legBtnRow{display:none; margin-top:8px;}
+  .tiny{font-size:11px; color:var(--muted)}
+  /* Tooltip system */
+  #tooltipBox{
+    position:fixed; z-index:9999; display:none; max-width:340px;
+    background:rgba(10,17,26,0.95); border:1px solid var(--border);
+    border-radius:12px; padding:10px 12px; color:var(--text);
+    box-shadow:0 10px 30px rgba(0,0,0,0.45);
+    pointer-events:auto;
+    font-size:12px; line-height:1.35;
+  }
+  .tip{cursor:help; text-decoration:underline dotted rgba(159,177,198,0.45); text-underline-offset:3px;}
+  /* Legend rows use class tip for tooltips but must not inherit circular icon sizing */
+  .legend .legRow.tip{width:auto; height:auto; padding:4px 6px; border:none; background:transparent; border-radius:10px; justify-content:flex-start;}
+  .legend .legRow.tip:hover{background:rgba(255,255,255,0.06);}
+  @media (max-width: 980px){
+    .app{grid-template-columns:1fr; grid-template-rows:auto 1fr;}
+    .side{height:auto; max-height:48vh;}
+    .legend{display:none;}
+    .legBtnRow{display:flex;}
+  }
+  .modalBackdrop{
+    position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+    background:rgba(0,0,0,0.55); z-index:9998;
+  }
+  .modal{
+    width:min(520px, 92vw);
+    background:rgba(10,17,26,0.97); border:1px solid var(--border);
+    border-radius:18px; padding:16px;
+  }
+  .modal h3{margin:0 0 8px 0;}
+  .modal .row{justify-content:flex-end;}
+  .badge{display:inline-block; padding:2px 8px; border-radius:999px; border:1px solid var(--border); color:var(--muted); font-size:11px;}
+</style>
 </head>
 <body>
-<div class="wrap">
-  <aside class="side">
-    <h1>HDRcade PZ B42 Map Cleaner (42.13+)</h1>
-    <div class="sub">Copyright © Tyler Freeman (HDRcade) 2026. All rights reserved.</div>
-
-    <div class="links">
-      <a class="pill" href="https://steamcommunity.com/id/HDRcade/myworkshopfiles/?appid=108600" target="_blank" rel="noopener">Workshop</a>
-      <a class="pill" href="https://patreon.com/HDRcade" target="_blank" rel="noopener">Patreon</a>
-      <a class="pill" href="https://ko-fi.com/HDRcade" target="_blank" rel="noopener">Ko-fi</a>
-      <a class="pill" href="https://pine.host/hdrcade" target="_blank" rel="noopener">Pine hosting</a>
-      <a class="pill" href="./helper.html" target="_blank" rel="noopener">Python Helper Guide</a>
-      <a class="pill" href="./HDRcade PZ Map Cleaner helper.zip" target="_blank" rel="noopener">Helper download</a>
-      <a class="pill" href="./guide.html" target="_blank" rel="noopener">Guide</a>
-    </div>
-
-    <div class="sec">
-      <h2>Method 1) Fast Mode / Python Helper<span class="tip" data-tip="For large servers. Load a prebuilt Save Index (.json) instead of scanning files in the browser.&#10;&#10;Safehouses can be auto-protected and visualised.">i</span></h2>
-      <div class="row">
-        <button id="btnLoadIndex" class="primary">Load Save Index (.json)</button>
-        <input id="indexFile" type="file" accept="application/json" style="display:none" />
-        <span id="fastBadge" class="pill" style="display:none">⚡ Fast Mode (Index)</span>
-      </div>
-      <div class="row" style="margin-top:8px">
-        <label class="pill"><input id="chkAutoProtectSH" type="checkbox" checked> Auto-protect safehouses</label>
-        <label class="pill"><input id="chkShowSH" type="checkbox" checked> Show safehouses</label>
-        <label class="pill"><input id="chkSafehouseHeat" type="checkbox" checked> Safehouse heatmap</label>
-        <label class="pill"><input id="chkShowBins" type="checkbox" checked> Show populated bins</label>
-      </div>
-      <div class="hint" id="indexStatus">No index loaded.</div>
-    </div>
-
-    <div class="sec">
-      <h2>Method 2) Load save folder (slow have patience)<span class="tip" data-tip="Read-only works everywhere: pick the SAVE ROOT folder (the one that contains map/).&#10;&#10;Read/Write uses the Folder Picker API and only works on supported browsers + secure context (localhost / https).&#10;&#10;For very large servers, use the Save Index (.json).">i</span></h2>
-      <div class="row">
-        <button id="btnRW" class="primary">Select Save Folder (Read/Write)</button>
-        <button id="btnRO">Load Read-Only (folder input)</button>
-        <input id="roPicker" type="file" webkitdirectory multiple style="display:none" />
-      </div>
-      <div class="stat">
-        <div class="chip" id="secureChip">secure: …</div>
-        <div class="chip" id="binsChip">bins: 0</div>
-        <div class="chip" id="selChip">selected: 0</div>
-      </div>
-      <div class="hint" id="saveHint">Not loaded.</div>
-      <div class="banner" id="indexRecoBanner">
-        <strong>Index recommended:</strong> large server detected. Use the Python helper to generate a Save Index (.json) for instant loading.
+<div class="app">
+  <div class="side">
+    <div class="brand">
+      <h1>HDRcade PZ B42 Map Cleaner <span class="badge">42.13+</span></h1>
+      <div class="tiny">Fast, audit-friendly map/.bin cleaner for huge servers.</div>
+      <div class="pills">
+        <a class="pill" href="https://steamcommunity.com/id/HDRcade/myworkshopfiles/?appid=108600" target="_blank" rel="noopener">Workshop</a>
+        <a class="pill" href="https://patreon.com/HDRcade" target="_blank" rel="noopener">Patreon</a>
+        <a class="pill" href="https://ko-fi.com/HDRcade" target="_blank" rel="noopener">Ko-fi</a>
+        <a class="pill" href="https://pine.host/hdrcade" target="_blank" rel="noopener">Hosting</a>
+        <a class="pill" href="helper/README.txt" target="_blank" rel="noopener">Python helper</a>
+        <a class="pill" href="guide.html" target="_blank" rel="noopener">Guide</a>
       </div>
     </div>
 
     <div class="sec">
-      <h2>2) View (built-in map) <span class="tip" data-tip="This tool does NOT accept map uploads.&#10;&#10;Put your basemap in the same folder as index.html as: map.jpg&#10;&#10;On GitHub Pages the name is CASE-SENSITIVE.">i</span></h2>
+      <h2>1) Fast Mode</h2>
       <div class="row">
-        <button id="btnAutoMap" class="primary">Reload map.jpg</button>
-        <button id="btnClearMap">Hide map</button>
+        <button class="primary" id="btnLoadIndex" title="Load save_index.json">Load save_index.json</button>
+        <button id="btnToggleLegend" class="tip" data-tip="On small screens, the legend auto-hides. Use this button to show/hide it.">Legend</button>
       </div>
+      <div class="hint tip" data-tip="Fast Mode uses save_index.json created by the Python helper (recommended for large servers).
 
-      <div class="kv" style="margin-top:10px">
-        <div>
-          <label>Opacity</label>
-          <input id="mapOpacity" type="range" min="0" max="100" value="75" />
-        </div>
-        <div>
-          <label>Smoothing</label>
-          <select id="mapSmooth">
-            <option value="on" selected>On</option>
-            <option value="off">Off (pixel sharp)</option>
-          </select>
-        </div>
+It does NOT scan your filesystem in the browser.">
+        Recommended for servers with 100k+ files.
       </div>
-
-      <div class="hint">Corner lock is applied by default (for HDRcade map.jpg).</div>
-      <div class="kv">
-        <div><label>Top-right X</label><input id="trX" type="number" value="19796"></div>
-        <div><label>Top-right Y</label><input id="trY" type="number" value="4"></div>
-        <div><label>Bottom-left X</label><input id="blX" type="number" value="0"></div>
-        <div><label>Bottom-left Y</label><input id="blY" type="number" value="15899"></div>
-      </div>
-      <div class="row" style="margin-top:8px">
-        <button id="btnApplyLock" class="primary">Re-apply lock TR/BL</button>
-        <button id="btnFitRough">Fit to loaded bins (rough)</button>
-      </div>
-      <div class="hint" id="mapStatus">Basemap: none</div>
+      <div id="fastStats" class="warn"></div>
     </div>
 
     <div class="sec">
-      <h2>3) Grid + dry-run <span class="tip" data-tip="Cell grid = 300 tiles (best for 'keep towns').&#10;Bin grid = 8 tiles (actual .bin files).&#10;&#10;Dry-run heatmap: green=kept (manual/preset/safehouse), red=selected for delete.">i</span></h2>
+      <h2>2) View</h2>
       <div class="row">
-        <label class="pill"><input id="chkGrid" type="checkbox" checked> Show grid</label>
-        <label class="pill"><input id="chkHover" type="checkbox" checked> Show hover coords</label>
-        <label class="pill"><input id="chkHeat" type="checkbox"> Dry-run heatmap</label>
-        <label class="pill mobile-only"><input id="chkLegendMobile" type="checkbox"> Show legend</label>
-      </div>
-      <div class="kv" style="margin-top:10px">
-        <div>
-          <label>Grid type</label>
-          <select id="gridType">
-            <option value="cell" selected>Cell grid (300 tiles)</option>
-            <option value="bin">Bin grid (8 tiles)</option>
-            <option value="custom">Custom (tile spacing)</option>
-          </select>
-        </div>
-        <div>
-          <label>Custom tile spacing</label>
-          <input id="gridCustom" type="number" value="300" min="1" />
-        </div>
-      </div>
-      <div class="kv" style="margin-top:10px">
-        <div><label>Grid opacity</label><input id="gridOpacity" type="range" min="0" max="100" value="35"></div>
-        <div><label>Min zoom to draw</label><input id="minZoom" type="number" value="0.07" step="0.01" min="0.01"></div>
-      </div>
-    </div>
+        <label class="tip" data-tip="Grid size for overlays & selection.
 
-    <div class="sec">
-      <h2>4) Keep Cells (inverse delete) <span class="tip" data-tip="Type the cell coordinates you want to KEEP (one per line).&#10;&#10;Format: x,y or x,y -> x2,y2 (range).&#10;&#10;Then 'Apply inverse selection' will select everything EXCEPT kept cells.">i</span></h2>
-      <div class="row">
-        <label class="pill"><input id="chkKeep" type="checkbox"> Enable KEEP list</label>
-        <button id="btnApplyInverse" class="danger">Apply inverse selection</button>
-      </div>
-      <div class="hint">Keep cell list (one per line)</div>
-      <textarea id="keepText" spellcheck="false" placeholder="Example&#10;7,38&#10;7,38 -> 9,40"></textarea>
-      <div class="row" style="margin-top:8px">
-        <button id="btnParseReplace">Parse / Replace</button>
-        <button id="btnParseAdd">Parse / Add</button>
-        <button id="btnKeepClear">Clear list</button>
-      </div>
-
-      <div class="row" style="margin-top:10px">
-        <select id="presetSel">
-          <option value="">— Select preset —</option>
-          <option value="louisville">Keep Louisville (approx)</option>
-          <option value="muldraugh">Keep Muldraugh (approx)</option>
+'Cell (300)' matches the common PZ cell grid (300 tiles).">Grid</label>
+        <select id="gridSize">
+          <option value="300" selected>Cell (300 tiles)</option>
+          <option value="150">150 tiles</option>
+          <option value="100">100 tiles</option>
+          <option value="50">50 tiles</option>
         </select>
-        <button id="btnAddPreset">Add preset</button>
+        <label class="tip" data-tip="Blue overlay shows where .bin files exist (populated).">Show populated</label>
+        <input type="checkbox" id="chkShowPop" checked/>
+        <label class="tip" data-tip="Show the map basemap image (map.jpg) in the same folder as index.html.">Show map</label>
+        <input type="checkbox" id="chkShowMap" checked/>
       </div>
-      <div class="hint">Presets are best-effort boxes. For perfect accuracy, use b42map to find exact cells.</div>
 
-      <div class="row" style="margin-top:10px">
-        <button id="btnExportKeep">Export keep list (.json)</button>
-        <button id="btnImportKeep">Import keep list (.json)</button>
-        <input id="keepFileIn" type="file" accept="application/json" style="display:none" />
+      <div class="row">
+        <label class="tip" data-tip="Default lock is ON. This aligns map.jpg to world tile coordinates using the fixed TR/BL anchors.">Apply lock TR/BL</label>
+        <input type="checkbox" id="chkLock" checked/>
+        <label class="tip" data-tip="Top-right world tile anchor (x,y).">TR</label>
+        <input type="text" id="lockTR" value="19796,4" style="width:120px"/>
+        <label class="tip" data-tip="Bottom-left world tile anchor (x,y).">BL</label>
+        <input type="text" id="lockBL" value="0,15899" style="width:120px"/>
       </div>
-      <div class="stat">
-        <div class="chip" id="keepCountChip">manual: 0 preset: 0 safehouse: 0</div>
+
+      <div class="legBtnRow row">
+        <button id="btnLegendMobile">Show legend</button>
       </div>
     </div>
 
     <div class="sec">
-      <h2>5) Selection tools <span class="tip" data-tip="Shift + Drag on the canvas adds selection rectangles.&#10;&#10;Paste b42map coords as two points (X/Y of opposite corners), then add as a rectangle.">i</span></h2>
-      <div class="hint">Shift + Drag adds rectangles.</div>
-      <div class="hint">Paste b42map coords (two points):</div>
-      <textarea id="pasteCoords" spellcheck="false" placeholder="X: 10000, Y: 5000&#10;X: 10400, Y: 5400"></textarea>
-      <div class="row" style="margin-top:8px">
-        <button id="btnAddRect">Add Rect from pasted coords</button>
-        <button id="btnClearRects">Clear rects</button>
+      <h2>3) Keep selection</h2>
+      <div class="hint">
+Shift + Drag = add KEEP box (turns populated cells amber)
+Ctrl + Shift + Drag = subtract KEEP box
+Right-click inside a KEEP box = remove that box
+Backspace/Delete = undo last box
       </div>
-      <div class="hint">Bin files live in <code>map/&lt;binX&gt;/&lt;binY&gt;.bin</code> where each bin is 8×8 tiles.</div>
+      <div class="row">
+        <button id="btnClearKeep" class="danger">Clear KEEP</button>
+        <button id="btnUndoKeep">Undo</button>
+        <button id="btnSaveKeep">Save KEEP .json</button>
+        <button id="btnLoadKeep">Load KEEP .json</button>
+      </div>
+      <div class="row">
+        <label class="tip" data-tip="Optional: paste specific keep cells (one per line) like:
+12,34
+12 35
+12-15,34-40">Keep cells (manual)</label>
+      </div>
+      <textarea id="keepText" placeholder="e.g. 12,34&#10;12-15,34-40"></textarea>
+      <div class="row">
+        <button id="btnApplyKeepText">Apply keep list</button>
+      </div>
+      <div id="keepStats" class="ok"></div>
     </div>
 
     <div class="sec">
-      <h2>6) Export / Delete <span class="tip" data-tip="Export generates a .bat (Windows) or .sh (Linux/Docker) that deletes ONLY the selected bins.&#10;&#10;The script refuses to run unless it detects map/ in the current directory.&#10;&#10;Unsafe export is blocked if your selection overlaps safehouses / high-risk cells.">i</span></h2>
+      <h2>4) Safehouses</h2>
+      <div class="row">
+        <label class="tip" data-tip="If the save_index.json includes safehouses, draw their rectangles. Hover to see owner/town.">Show safehouses</label>
+        <input type="checkbox" id="chkShowSH" checked/>
+        <label class="tip" data-tip="Auto-add safehouse areas to KEEP (recommended).">Auto-protect</label>
+        <input type="checkbox" id="chkAutoProtectSH" checked/>
+      </div>
+      <div class="row">
+        <label class="tip" data-tip="Optional buffer around each safehouse, in tiles.
+
+Example: 100 means a 100-tile border around safehouse rectangles is also protected and blocked from delete.
+
+Default is 0 (neutral).">Safehouse padding (tiles)</label>
+        <input id="shPad" type="number" value="0" min="0" step="1" style="width:120px"/>
+      </div>
+      <div class="hint">
+Safehouse core = green dashed outline
+Safehouse padding = lighter green dashed outline (only if padding > 0)
+      </div>
+      <div id="shStats" class="ok"></div>
+    </div>
+
+    <div class="sec">
+      <h2>5) Dry-run & Export</h2>
+      <div class="row">
+        <label class="tip" data-tip="If enabled, shows what WOULD be deleted when you apply inverse selection (red overlay).">Dry-run</label>
+        <input type="checkbox" id="chkDryRun" checked/>
+        <button id="btnInverse" class="primary tip" data-tip="Marks everything populated as DELETE except KEEP (and auto-protected safehouses).">Apply inverse selection</button>
+      </div>
       <div class="row">
         <button id="btnExport" class="primary">Export delete script</button>
-        <button id="btnDelete" class="danger">Delete selected bins (map only)</button>
+        <button id="btnClearDelete" class="danger">Clear DELETE</button>
       </div>
-      <div class="hint">Always stop the server and back up the save folder first.</div>
+      <div id="exportWarn" class="warn"></div>
+      <div class="hint tip" data-tip="Safety:
+• Export is blocked if it would delete a protected safehouse area.
+• The script includes directory checks and must be run from the save root that contains map\ .">
+Export generates a .bat (Windows) or .sh (Linux) for you to run.
+      </div>
+      <div class="log" id="logBox"></div>
     </div>
 
     <div class="sec">
-      <h2>Guide <span class="tip" data-tip="Opens guide.html (included) in a popup or new tab.">i</span></h2>
+      <h2>6) Presets</h2>
+      <div class="hint">Optional quick KEEP presets (coarse). These are simple bounding boxes and may be conservative.</div>
       <div class="row">
-        <button id="btnGuide" class="primary">Open Guide (popup)</button>
-        <a class="pill" href="./guide.html" target="_blank" rel="noopener">Open guide.html tab</a>
+        <button id="btnPresetLouisville">Keep Louisville</button>
+        <button id="btnPresetMuldraugh">Keep Muldraugh</button>
       </div>
+      <div class="tiny">Presets are best-effort. Prefer safehouses + manual keep for accuracy.</div>
     </div>
 
     <div class="sec">
-      <h2>Log</h2>
-      <textarea id="log" class="log" readonly></textarea>
+      <h2>Status</h2>
+      <div class="row">
+        <div class="kv">Populated bins: <b id="statBins">0</b></div>
+      </div>
+      <div class="row">
+        <div class="kv">KEEP cells: <b id="statKeep">0</b></div>
+        <div class="kv">DELETE bins: <b id="statDel">0</b></div>
+      </div>
+      <div class="row">
+        <div class="kv">Safehouses: <b id="statSh">0</b></div>
+      </div>
     </div>
+  </div>
 
-  </aside>
-
-  <main class="main">
+  <div class="main">
     <div class="canvasWrap">
       <canvas id="c"></canvas>
-      <div class="hud" id="hud">hover: — | zoom: — | rects: 0</div>
+    </div>
 
-      <div id="legend" class="legend">
-        <h4>Legend</h4>
-
-        <div class="legRow legTip" data-tip="Yellow grid lines show alignment. 'Cell' grid uses 300x300 tiles. 'Bin' grid uses 8x8 tiles.">
-          <span class="legBox grid"></span><span>Grid</span>
-        </div>
-
-        <div class="legRow legTip" data-tip="Blue overlay shows which 300x300 cells contain at least one map '.bin' file. This is a fast overview for huge saves. Zoom in to draw/select more precisely.">
-          <span class="legBox bins"></span><span>Populated cells (bins)</span>
-        </div>
-
-        <div class="legRow legTip" data-tip="Safehouse proximity heatmap (low). Light red means nearby bases. Darker means higher risk.">
-          <span class="legBox heat1"></span><span>Safehouse proximity (low)</span>
-        </div>
-
-        <div class="legRow legTip" data-tip="Safehouse proximity heatmap (high). Export is blocked if your delete selection overlaps high-risk cells.">
-          <span class="legBox heat3"></span><span>Safehouse proximity (high)</span>
-        </div>
-
-        <div class="legRow legTip" data-tip="Cells containing a player safehouse. These are protected (kept) automatically when 'Auto-protect safehouses' is enabled.">
-          <span class="legBox sh"></span><span>Safehouse cell (protected)</span>
-        </div>
-
-        <div class="legRow legTip" data-tip="Selection rectangles you add using Shift+Drag or pasted coordinates.">
-          <span class="legBox rect"></span><span>Selection rectangle</span>
-        </div>
-
-        <div class="legRow legTip" data-tip="Red overlay appears in Dry-run heatmap mode to show what is selected for delete.">
-          <span class="legBox del"></span><span>Selected for delete</span>
-        </div>
-
-        <div class="legRow small tip" data-tip="Protected areas include safehouses and kept regions. Unsafe export is blocked to prevent nuking bases by accident.">
-          🔒 Protected areas cannot be deleted
-        </div>
+    <div class="topBar">
+      <div class="hud" id="hud">
+        <div class="kv">Zoom: <b id="hudZoom">1.0</b></div>
+        <div class="kv">Center: <b id="hudCenter">0,0</b></div>
+        <div class="kv">Grid: <b id="hudGrid">300</b></div>
+        <div class="kv">Hint: <b>Drag</b> pan, <b>Wheel</b> zoom, <b>Shift</b> select</div>
       </div>
-
+      <div class="hud">
+        <button id="btnResetView">Reset view</button>
+      </div>
     </div>
-  </main>
-</div>
 
-<div class="tooltipBox" id="tooltipBox"></div>
-
-<div class="modalBack" id="osModal">
-  <div class="modal">
-    <h3>Export delete script</h3>
-    <p>Choose the OS you will run the script on. Download will be <b>.bat</b> (Windows) or <b>.sh</b> (Linux/Docker).</p>
-    <p><b>IMPORTANT:</b> run the script from your Save root directory — the folder that contains <code>map/</code>. The script refuses to run if <code>map/</code> is missing.</p>
-    <div class="row" style="justify-content:space-between; margin-top:10px">
-      <label class="pill"><input id="chkDryRun" type="checkbox"> Dry-run (print only)</label>
-      <label class="pill"><input id="chkRememberOS" type="checkbox"> Remember my choice</label>
-    </div>
-    <div class="row" style="margin-top:10px">
-      <button id="btnWin" class="primary">Windows (.bat)</button>
-      <button id="btnLin" class="primary">Linux (.sh)</button>
-      <button id="btnCancel">Cancel</button>
+    <div class="legend" id="legend">
+      <h3>Legend</h3>
+      <div class="legRow tip" data-tip="Blue overlay shows where map .bin files exist (populated area).">
+        <div class="legBox" style="background:rgba(87,166,255,0.22)"></div>
+        <div class="legTxt">Populated (.bin exists)</div>
+      </div>
+      <div class="legRow tip" data-tip="Amber overlay indicates cells in your KEEP list/boxes.">
+        <div class="legBox" style="background:rgba(255,186,66,0.22)"></div>
+        <div class="legTxt">KEEP selection</div>
+      </div>
+      <div class="legRow tip" data-tip="Red overlay indicates bins marked for delete after applying inverse selection.">
+        <div class="legBox" style="background:rgba(255,80,80,0.22)"></div>
+        <div class="legTxt">Would delete (dry-run)</div>
+      </div>
+      <div class="legRow tip" data-tip="Safehouse core rectangle (as stored by server).">
+        <div class="legBox" style="background:transparent; border:2px dashed rgba(0,255,140,0.65)"></div>
+        <div class="legTxt">Safehouse core outline</div>
+      </div>
+      <div class="legRow tip" data-tip="Safehouse padding outline (only if padding > 0).">
+        <div class="legBox" style="background:transparent; border:2px dashed rgba(0,255,140,0.35)"></div>
+        <div class="legTxt">Safehouse padding outline</div>
+      </div>
+      <div class="tiny">Tip: Hover safehouse to see owner & town.</div>
     </div>
   </div>
 </div>
 
-<div class="modalBack" id="guideModal">
-  <div class="modal" style="height:min(78vh,720px);">
-    <div class="row" style="justify-content:space-between; align-items:center">
-      <h3 style="margin:0">HDRcade Guide</h3>
-      <button id="btnCloseGuide">Close</button>
+<div id="tooltipBox"></div>
+
+<div class="modalBackdrop" id="osModal">
+  <div class="modal">
+    <h3>Export delete script</h3>
+    <div class="hint">Choose your server OS. The script will be downloaded and must be run from your <b>save root</b> (the folder that contains <code>map\</code>).</div>
+    <div class="row" style="margin-top:10px">
+      <button class="primary" id="btnExportWin">Windows (.bat)</button>
+      <button class="primary" id="btnExportLinux">Linux (.sh)</button>
+      <button id="btnExportCancel">Cancel</button>
     </div>
-    <iframe id="guideFrame" src="./guide.html"
-      style="width:100%; height:calc(100% - 42px); border:1px solid var(--line); border-radius:12px; margin-top:10px; background:#fff;">
-    </iframe>
   </div>
 </div>
 
 <script>
-(function(){
-  const $ = (id)=>document.getElementById(id);
-  const c = $("c");
-  const ctx = c.getContext("2d");
-  const hud = $("hud");
-  const tipBox = $("tooltipBox");
+const $ = (id)=>document.getElementById(id);
 
-  // ---- state
-  let view = { x:0, y:0, zoom:0.35 };
-  let dragging = false, panStart=null, dragStart=null;
-  let rectDraft=null;
-  let rects = [];
-  let selectedBins = new Set();
-  let allBins = new Set();
-  let basemap = null;
+function log(msg){
+  const box=$("logBox");
+  const ts=new Date().toLocaleTimeString();
+  box.textContent += `[${ts}] ${msg}\n`;
+  box.scrollTop = box.scrollHeight;
+}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function parseXY(s){
+  const m=(s||"").split(",").map(t=>Number(t.trim()));
+  if(m.length!==2 || !Number.isFinite(m[0]) || !Number.isFinite(m[1])) return null;
+  return {x:m[0], y:m[1]};
+}
 
-  // Corner lock ON by default for HDRcade map.jpg
-  let lock = {tr:{x:19796,y:4}, bl:{x:0,y:15899}, enabled:true};
+/* ---------- Canvas / Camera ---------- */
+const canvas=$("c");
+const ctx=canvas.getContext("2d");
+let W=0,H=0, dpr=1;
+let camX=9000, camY=8000;
+let zoom=0.08;
+let isPanning=false, panStart=null;
+let selectionStart=null;
+let lastMouseWorld=null;
 
-  let keep = { enabled:false, manual:new Set(), preset:new Set(), safehouse:new Set() };
-  let keepAll = new Set();
+function resize(){
+  dpr=window.devicePixelRatio||1;
+  W=canvas.clientWidth; H=canvas.clientHeight;
+  canvas.width=Math.floor(W*dpr); canvas.height=Math.floor(H*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  draw();
+}
+window.addEventListener("resize", resize);
 
-  let hoverText = "—";
-  let fsRoot = null;
+function worldToScreen(x,y){ return {x:(x-camX)*zoom + W/2, y:(y-camY)*zoom + H/2}; }
+function screenToWorld(x,y){ return {x:(x - W/2)/zoom + camX, y:(y - H/2)/zoom + camY}; }
 
-  // Index / fast mode
-  let indexData = null;
-  let usingIndex = false;
+function setZoom(newZoom, anchorScreen){
+  const a = anchorScreen || {x:W/2, y:H/2};
+  const before=screenToWorld(a.x,a.y);
+  zoom=clamp(newZoom, 0.01, 2.5);
+  const after=screenToWorld(a.x,a.y);
+  camX += (before.x - after.x);
+  camY += (before.y - after.y);
+}
 
-  // Safehouses
-  let safehouseRects = [];          // raw rects [{x,y,w,h,owner}]
-  let safehouseCells = new Set();   // cell keys that contain safehouses (always computed)
-  let hoveredSafehouse = null;
+/* ---------- Basemap (map.jpg) + lock ---------- */
+let mapImg=null, mapImgReady=false, mapErr=null;
+const LOCK_DEFAULT_TR={x:19796,y:4};
+const LOCK_DEFAULT_BL={x:0,y:15899};
 
-  // Safehouse heatmap intensity
-  let safehouseHeat = new Map();
+function loadMapImage(){
+  mapImgReady=false; mapErr=null;
+  mapImg=new Image();
+  mapImg.onload=()=>{mapImgReady=true; draw();};
+  mapImg.onerror=()=>{mapErr="map.jpg not found (place it next to index.html)"; draw();};
+  mapImg.src="map.jpg?cachebust="+Date.now();
+}
+loadMapImage();
 
-  // Bin coverage (fast overview): cellKey -> number of .bin entries inside that 300x300 cell
-  let binCellCounts = new Map();
-  let binCellMax = 1;    // cellKey -> intensity [0..5]
+function getLockAnchors(){
+  const tr=parseXY($("lockTR").value) || LOCK_DEFAULT_TR;
+  const bl=parseXY($("lockBL").value) || LOCK_DEFAULT_BL;
+  return {tr, bl};
+}
 
-  // Town labels (best-effort)
-  const TOWN_LABELS = [
-    { name: "Louisville", cx1:42, cy1:2,  cx2:56, cy2:16 },
-    { name: "Muldraugh",  cx1:32, cy1:34, cx2:38, cy2:41 },
-    { name: "West Point", cx1:36, cy1:23, cx2:40, cy2:27 },
-  ];
-  let protectedTowns = [];
+/* ---------- Data ---------- */
+let indexData=null;
+let binsByX = new Map();      // bx -> [[y0,y1],...]
+let binsCount = 0;
+let binTileSize = 8;
+let populatedCellCounts = new Map(); // "cx,cy" -> count
+let populatedCellMax = 1;
 
-  // ---- utilities
-  function log(msg){
-    const t = new Date().toISOString().slice(11,19);
-    const el = $("log");
-    el.value = `[${t}] ${msg}\n` + el.value;
-  }
-  function setChips(){
-    $("secureChip").textContent = "secure: " + (window.isSecureContext ? "yes" : "no");
-    $("binsChip").textContent = "bins: " + allBins.size.toLocaleString();
-    $("selChip").textContent = "selected: " + selectedBins.size.toLocaleString();
-    $("keepCountChip").textContent = `manual: ${keep.manual.size} preset: ${keep.preset.size} safehouse: ${keep.safehouse.size}`;
-  }
+let gridSize = 300;
+let keepRects = [];           // {cx1,cy1,cx2,cy2}
+let keepCells = new Set();    // "cx,cy"
+let manualKeepCells = new Set();
 
-  function maybeWarnLargeServer(){
-    const banner = $("indexRecoBanner");
-    const threshold = 120000; // heuristic
-    if(!usingIndex && allBins.size >= threshold){
-      banner.style.display = "block";
-      log(`Large server detected (${allBins.size.toLocaleString()} bins). Index recommended.`);
-    } else {
-      banner.style.display = "none";
+let deleteBins = new Set();   // "bx/by"
+let deleteCellCounts = new Map();
+
+let safehouses = [];          // {x,y,w,h,owner,town,name,members}
+let safehousePad = 0;
+let protectedBins = new Set();
+let hoveredSafehouse = null;
+
+function cellKey(cx,cy){ return cx + "," + cy; }
+function binKey(bx,by){ return bx + "/" + by; }
+
+function recomputeKeepCells(){
+  keepCells.clear();
+  for(const r of keepRects){
+    for(let cx=r.cx1; cx<=r.cx2; cx++){
+      for(let cy=r.cy1; cy<=r.cy2; cy++){
+        keepCells.add(cellKey(cx,cy));
+      }
     }
   }
+  for(const k of manualKeepCells) keepCells.add(k);
 
-  function rebuildKeepAll(){
-    keepAll = new Set([...keep.manual, ...keep.preset, ...keep.safehouse]);
-    updateProtectedTowns();
+  if($("chkAutoProtectSH").checked){
+    for(const k of protectedBins){
+      const [bx,by]=k.split("/").map(Number);
+      if(!Number.isFinite(bx)||!Number.isFinite(by)) continue;
+      const tx=bx*binTileSize, ty=by*binTileSize;
+      const cx=Math.floor(tx/gridSize), cy=Math.floor(ty/gridSize);
+      keepCells.add(cellKey(cx,cy));
+    }
+  }
+  $("statKeep").textContent = keepCells.size;
+  $("keepStats").textContent = keepCells.size ? `KEEP cells: ${keepCells.size}` : "";
+}
+
+function parseKeepText(){
+  manualKeepCells.clear();
+  const txt=$("keepText").value||"";
+  const lines=txt.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+  const addCell=(cx,cy)=>{ if(Number.isFinite(cx)&&Number.isFinite(cy)) manualKeepCells.add(cellKey(cx,cy)); };
+  for(const line of lines){
+    const m=line.match(/^(\d+)\s*-\s*(\d+)\s*[, ]\s*(\d+)\s*-\s*(\d+)$/);
+    if(m){
+      let x1=+m[1], x2=+m[2], y1=+m[3], y2=+m[4];
+      if(x2<x1) [x1,x2]=[x2,x1];
+      if(y2<y1) [y1,y2]=[y2,y1];
+      for(let cx=x1; cx<=x2; cx++) for(let cy=y1; cy<=y2; cy++) addCell(cx,cy);
+      continue;
+    }
+    const m2=line.match(/^(\d+)\s*[, ]\s*(\d+)$/);
+    if(m2){ addCell(+m2[1], +m2[2]); continue; }
+  }
+  recomputeKeepCells();
+  draw();
+}
+
+/* ---------- populated overlay ---------- */
+function recomputePopulatedCells(){
+  populatedCellCounts.clear();
+  populatedCellMax=1;
+  if(!binsByX.size) return;
+
+  function cellFromBinIndex(bi){ return Math.floor((bi*binTileSize)/gridSize); }
+  function startBinForCell(c){ return Math.floor((c*gridSize + (binTileSize-1))/binTileSize); } // ceil
+  function startBinForNextCell(c){ return Math.floor(((c+1)*gridSize + (binTileSize-1))/binTileSize); } // ceil
+
+  for(const [bx, ranges] of binsByX.entries()){
+    const cx = Math.floor((bx*binTileSize)/gridSize);
+    for(const [y0,y1] of ranges){
+      let cy0 = cellFromBinIndex(y0);
+      let cy1 = cellFromBinIndex(y1);
+      for(let cy=cy0; cy<=cy1; cy++){
+        const a = Math.max(y0, startBinForCell(cy));
+        const b = Math.min(y1, startBinForNextCell(cy)-1);
+        if(b>=a){
+          const count = (b-a+1);
+          const k = cellKey(cx,cy);
+          const prev = populatedCellCounts.get(k)||0;
+          const next = prev + count;
+          populatedCellCounts.set(k, next);
+          if(next > populatedCellMax) populatedCellMax = next;
+        }
+      }
+    }
+  }
+}
+
+/* ---------- safehouses ---------- */
+function buildProtectedBins(){
+  protectedBins.clear();
+  safehousePad = Math.max(0, Number($("shPad").value||0)|0);
+
+  for(const sh of safehouses){
+    const x1 = Math.floor((sh.x - safehousePad)/binTileSize);
+    const y1 = Math.floor((sh.y - safehousePad)/binTileSize);
+    const x2 = Math.floor((sh.x + sh.w + safehousePad)/binTileSize);
+    const y2 = Math.floor((sh.y + sh.h + safehousePad)/binTileSize);
+
+    for(let bx=x1; bx<=x2; bx++){
+      for(let by=y1; by<=y2; by++){
+        protectedBins.add(binKey(bx,by));
+      }
+    }
+  }
+  $("shStats").textContent = safehouses.length ? `Safehouses: ${safehouses.length} (protected bins ≈ ${protectedBins.size})` : "";
+  $("statSh").textContent = safehouses.length;
+  recomputeKeepCells();
+}
+
+/* ---------- inverse selection + delete ---------- */
+let inverseApplied=false;
+
+function clearDelete(){
+  deleteBins.clear();
+  deleteCellCounts.clear();
+  inverseApplied=false;
+  $("statDel").textContent = "0";
+}
+
+function computeDeleteFromInverse(){
+  if(!binsByX.size){ $("exportWarn").textContent="Load save_index.json first."; return; }
+  clearDelete();
+
+  if(keepCells.size===0) log("WARN: KEEP is empty. Inverse selection would delete everything populated.");
+
+  const xs = Array.from(binsByX.keys()).sort((a,b)=>a-b);
+  let xi=0;
+  const batchMs=18;
+  let protectedHits=0;
+
+  function addDeleteCell(bx,by,count){
+    const tx=bx*binTileSize, ty=by*binTileSize;
+    const cx=Math.floor(tx/gridSize), cy=Math.floor(ty/gridSize);
+    const k=cellKey(cx,cy);
+    deleteCellCounts.set(k, (deleteCellCounts.get(k)||0) + count);
   }
 
-  function updateProtectedTowns(){
-    protectedTowns = [];
-    if(keepAll.size === 0) return;
+  function step(){
+    const t0=performance.now();
+    while(xi<xs.length && performance.now()-t0<batchMs){
+      const bx=xs[xi];
+      const ranges=binsByX.get(bx);
+      for(const [y0,y1] of ranges){
+        let by=y0;
+        while(by<=y1){
+          const ty=by*binTileSize;
+          const cy=Math.floor(ty/gridSize);
+          const nextTy=(cy+1)*gridSize;
+          const nextBy=Math.floor((nextTy + (binTileSize-1))/binTileSize); // ceil
+          const segEnd=Math.min(y1, nextBy-1);
+          const segCount=segEnd-by+1;
 
-    for(const t of TOWN_LABELS){
-      let found = false;
-      for(let cx=t.cx1; cx<=t.cx2 && !found; cx++){
-        for(let cy=t.cy1; cy<=t.cy2; cy++){
-          if(keepAll.has(cx + "," + cy)){
-            found = true;
-            break;
+          const tx=bx*binTileSize;
+          const cx=Math.floor(tx/gridSize);
+          const kept = keepCells.has(cellKey(cx,cy));
+
+          if(!kept){
+            for(let j=by;j<=segEnd;j++){
+              const k=binKey(bx,j);
+              if(protectedBins.has(k)) protectedHits++;
+              deleteBins.add(k);
+            }
+            addDeleteCell(bx, by, segCount);
           }
+          by=segEnd+1;
         }
       }
-      if(found) protectedTowns.push(t);
+      xi++;
     }
-  }
 
-  function resize(){
-    const dpr = Math.max(1, window.devicePixelRatio || 1);
-    const r = c.getBoundingClientRect();
-    c.width = Math.floor(r.width * dpr);
-    c.height= Math.floor(r.height* dpr);
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-    draw();
-  }
-  window.addEventListener("resize", resize);
+    $("statDel").textContent = String(deleteBins.size);
 
-  function worldToScreen(wx,wy){
-    const r = c.getBoundingClientRect();
-    const cx = r.width/2, cy=r.height/2;
-    return { x: (wx - view.x)*view.zoom + cx, y: (wy - view.y)*view.zoom + cy };
-  }
-  function screenToWorld(sx,sy){
-    const r = c.getBoundingClientRect();
-    const cx = r.width/2, cy=r.height/2;
-    return { x: (sx - cx)/view.zoom + view.x, y: (sy - cy)/view.zoom + view.y };
-  }
-  function gridSpacing(){
-    const gt = $("gridType").value;
-    if (gt === "cell") return 300;
-    if (gt === "bin") return 8;
-    const v = Number($("gridCustom").value || 300);
-    return Math.max(1, v);
-  }
-  function binKey(bx,by){ return bx + "," + by; }
-  function parseBKey(k){ const [a,b]=k.split(",").map(Number); return {bx:a,by:b}; }
-
-  function resetBinCoverage(){ binCellCounts = new Map(); binCellMax = 1; }
-  function trackBin(bx,by){
-    allBins.add(binKey(bx,by));
-    const cc = tileToCell(bx*8, by*8);
-    const ck = cellKey(cc.cx, cc.cy);
-    const n = (binCellCounts.get(ck) || 0) + 1;
-    binCellCounts.set(ck, n);
-    if(n > binCellMax) binCellMax = n;
-  }
-
-  function rectNormalize(r){
-    const x1 = Math.min(r.x1,r.x2), x2=Math.max(r.x1,r.x2);
-    const y1 = Math.min(r.y1,r.y2), y2=Math.max(r.y1,r.y2);
-    return {x1,y1,x2,y2};
-  }
-  function tileToCell(wx,wy){ return { cx: Math.floor(wx/300), cy: Math.floor(wy/300) }; }
-  function cellKey(cx,cy){ return cx + "," + cy; }
-
-  function parseKeepText(text){
-    const out = new Set();
-    const lines = String(text||"").split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
-    for (const ln of lines){
-      const m = ln.match(/^(-?\d+)\s*,\s*(-?\d+)(?:\s*->\s*(-?\d+)\s*,\s*(-?\d+))?$/);
-      if(!m) continue;
-      const x1=+m[1], y1=+m[2];
-      if(m[3]!==undefined){
-        const x2=+m[3], y2=+m[4];
-        const xmin=Math.min(x1,x2), xmax=Math.max(x1,x2);
-        const ymin=Math.min(y1,y2), ymax=Math.max(y1,y2);
-        for(let x=xmin;x<=xmax;x++) for(let y=ymin;y<=ymax;y++) out.add(cellKey(x,y));
-      }else out.add(cellKey(x1,y1));
-    }
-    return out;
-  }
-
-  function applyInverseSelection(){
-    if(!keep.enabled){ log("Enable KEEP list first."); return; }
-    rebuildKeepAll();
-    if(keepAll.size===0){ log("KEEP list is empty."); return; }
-    if(allBins.size===0){ log("No bins loaded. Load a save folder or index first."); return; }
-    selectedBins.clear();
-    for(const k of allBins){
-      const {bx,by} = parseBKey(k);
-      const wx = bx*8, wy = by*8;
-      const {cx,cy} = tileToCell(wx,wy);
-      if(!keepAll.has(cellKey(cx,cy))) selectedBins.add(k);
-    }
-    log(`Inverse selection applied. Selected ${selectedBins.size.toLocaleString()} bins for delete.`);
-    setChips(); draw();
-  }
-
-  function applyCornerLockFromFields(){
-    lock.tr.x = Number($("trX").value||lock.tr.x);
-    lock.tr.y = Number($("trY").value||lock.tr.y);
-    lock.bl.x = Number($("blX").value||lock.bl.x);
-    lock.bl.y = Number($("blY").value||lock.bl.y);
-    lock.enabled = true;
-    log(`Corner lock active TR(${lock.tr.x},${lock.tr.y}) BL(${lock.bl.x},${lock.bl.y}).`);
-  }
-
-  function applyBasemap(img, name){
-    basemap = img;
-    $("mapStatus").textContent = `Basemap: ${name} (${img.naturalWidth}x${img.naturalHeight})`;
-
-    applyCornerLockFromFields();
-    view.x = (lock.bl.x + lock.tr.x)/2;
-    view.y = (lock.bl.y + lock.tr.y)/2;
-
-    draw();
-  }
-
-  async function autoLoadBasemap(){
-    const candidates = ["map.jpg","map.jpeg","map.png","map.webp","Map.jpg","MAP.JPG"];
-    for(const file of candidates){
-      const img = await new Promise((resolve)=>{
-        const i = new Image();
-        i.onload=()=>resolve(i);
-        i.onerror=()=>resolve(null);
-
-        const url = (location.protocol==="file:") ? file : (file + "?t=" + Date.now());
-        i.src = url;
-      });
-      if(img){
-        applyBasemap(img, file);
-        log("Basemap loaded: " + file);
-        return;
+    if(xi<xs.length){
+      $("exportWarn").textContent = `Applying inverse selection… ${xi}/${xs.length} folders`;
+      requestAnimationFrame(step);
+    } else {
+      inverseApplied=true;
+      if(protectedHits>0){
+        $("exportWarn").textContent = `BLOCKED: inverse selection overlaps protected safehouse area (${protectedHits} bins). Reduce padding / add KEEP around safehouses.`;
+        log(`BLOCKED: protected bins touched (${protectedHits}).`);
+      } else {
+        $("exportWarn").textContent = `Inverse selection ready. Delete bins: ${deleteBins.size}.`;
+        log(`Inverse selection complete. Delete bins: ${deleteBins.size}.`);
       }
+      draw();
     }
-    log("Basemap load failed. Put map.jpg next to index.html (case-sensitive on GitHub Pages).");
-    $("mapStatus").textContent = "Basemap: none";
-    basemap = null;
-    draw();
+  }
+  requestAnimationFrame(step);
+}
+
+/* ---------- export script ---------- */
+function buildDeletePlanByFolder(){
+  const plan=new Map();
+  for(const k of deleteBins){
+    const [bxS, byS]=k.split("/");
+    const bx=+bxS, by=+byS;
+    if(!Number.isFinite(bx)||!Number.isFinite(by)) continue;
+    if(!plan.has(bx)) plan.set(bx, []);
+    plan.get(bx).push(by);
+  }
+  const planRanges=new Map();
+  for(const [bx, ys] of plan.entries()){
+    ys.sort((a,b)=>a-b);
+    const ranges=[];
+    let a=ys[0], b=ys[0];
+    for(let i=1;i<ys.length;i++){
+      const y=ys[i];
+      if(y===b+1) b=y;
+      else { ranges.push([a,b]); a=b=y; }
+    }
+    ranges.push([a,b]);
+    planRanges.set(bx,ranges);
+  }
+  return planRanges;
+}
+
+function downloadText(filename, content){
+  const blob=new Blob([content], {type:"text/plain"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url; a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1500);
+}
+
+function exportScript(osKind){
+  if(!inverseApplied || deleteBins.size===0){
+    $("exportWarn").textContent="Nothing to export. Click 'Apply inverse selection' first.";
+    return;
+  }
+  for(const k of deleteBins){
+    if(protectedBins.has(k)){
+      $("exportWarn").textContent="BLOCKED: delete plan overlaps protected safehouse area. Fix KEEP/padding first.";
+      return;
+    }
   }
 
-  function fitToBinsRough(){
-    if(allBins.size===0){ log("No bins loaded."); return; }
-    let minbx=Infinity, minby=Infinity, maxbx=-Infinity, maxby=-Infinity;
-    for(const k of allBins){
-      const {bx,by}=parseBKey(k);
-      minbx=Math.min(minbx,bx); minby=Math.min(minby,by);
-      maxbx=Math.max(maxbx,bx); maxby=Math.max(maxby,by);
-    }
-    view.x = ((minbx+maxbx+1)/2)*8;
-    view.y = ((minby+maxby+1)/2)*8;
-    log("View centered to bins (rough).");
-    draw();
-  }
+  const plan=buildDeletePlanByFolder();
+  const dt=new Date().toISOString().slice(0,19).replace(/[:T]/g,"-");
+  const mapFolder="map";
 
-  function computeSafehouseCells(){
-    safehouseCells.clear();
-    for(const sh of safehouseRects){
-      const x1 = Math.floor(sh.x/300);
-      const y1 = Math.floor(sh.y/300);
-      const x2 = Math.floor((sh.x + sh.w)/300);
-      const y2 = Math.floor((sh.y + sh.h)/300);
-      for(let cx=x1; cx<=x2; cx++){
-        for(let cy=y1; cy<=y2; cy++){
-          safehouseCells.add(cellKey(cx,cy));
+  if(osKind==="win"){
+    const out=[];
+    out.push("@echo off");
+    out.push("setlocal EnableExtensions EnableDelayedExpansion");
+    out.push("echo HDRcade PZ B42 Map Cleaner - DELETE SCRIPT");
+    out.push("echo ------------------------------------------------");
+    out.push("echo This will delete map\\ coordinate .bin files.");
+    out.push("echo Run this from your SAVE ROOT (contains map\\)");
+    out.push("echo.");
+    out.push("if not exist \"%CD%\\map\\\" (");
+    out.push("  echo ERROR: map\\ not found in current directory.");
+    out.push("  echo Please run this .bat from the save root that contains map\\");
+    out.push("  pause");
+    out.push("  exit /b 1");
+    out.push(")");
+    out.push("echo OK: map\\ folder found.");
+    out.push("echo.");
+    out.push("set COUNT=0");
+    for(const [bx, ranges] of Array.from(plan.entries()).sort((a,b)=>a[0]-b[0])){
+      out.push(`if exist "${mapFolder}\\${bx}\\" (`);
+      for(const [a,b] of ranges){
+        if(a===b){
+          out.push(`  if exist "${mapFolder}\\${bx}\\${a}.bin" (del /q "${mapFolder}\\${bx}\\${a}.bin" & set /a COUNT+=1)`);
+        } else {
+          out.push(`  for /L %%Y in (${a},1,${b}) do (`);
+          out.push(`    if exist "${mapFolder}\\${bx}\\%%Y.bin" (del /q "${mapFolder}\\${bx}\\%%Y.bin" & set /a COUNT+=1)`);
+          out.push("  )");
         }
       }
+      out.push(")");
     }
-  }
-
-  function computeSafehouseHeat(){
-    safehouseHeat.clear();
-    for(const sh of safehouseRects){
-      const cx0 = Math.floor(sh.x/300);
-      const cy0 = Math.floor(sh.y/300);
-      for(let dx=-2; dx<=2; dx++){
-        for(let dy=-2; dy<=2; dy++){
-          const dist = Math.max(Math.abs(dx), Math.abs(dy));
-          let heat = 0;
-          if(dist===0) heat=3;
-          else if(dist===1) heat=2;
-          else if(dist===2) heat=1;
-          else continue;
-
-          const k = cellKey(cx0+dx, cy0+dy);
-          const prev = safehouseHeat.get(k) || 0;
-          safehouseHeat.set(k, Math.min(5, prev + heat));
+    out.push("echo.");
+    out.push("echo DONE. Deleted !COUNT! files.");
+    out.push("pause");
+    downloadText(`hdrcade_delete_map_bins_${dt}.bat`, out.join("\r\n"));
+    log("Downloaded Windows delete script.");
+  } else {
+    const out=[];
+    out.push("#!/usr/bin/env bash");
+    out.push("set -euo pipefail");
+    out.push("echo \"HDRcade PZ B42 Map Cleaner - DELETE SCRIPT\"");
+    out.push("echo \"------------------------------------------------\"");
+    out.push("echo \"This will delete map/ coordinate .bin files.\"");
+    out.push("echo \"Run this from your SAVE ROOT (contains map/)\"");
+    out.push("");
+    out.push("if [ ! -d \"./map\" ]; then");
+    out.push("  echo \"ERROR: ./map not found in current directory.\"");
+    out.push("  echo \"Please run this .sh from the save root that contains map/\"");
+    out.push("  exit 1");
+    out.push("fi");
+    out.push("echo \"OK: map/ folder found.\"");
+    out.push("COUNT=0");
+    for(const [bx, ranges] of Array.from(plan.entries()).sort((a,b)=>a[0]-b[0])){
+      out.push(`if [ -d "${mapFolder}/${bx}" ]; then`);
+      for(const [a,b] of ranges){
+        if(a===b){
+          out.push(`  if [ -f "${mapFolder}/${bx}/${a}.bin" ]; then rm -f "${mapFolder}/${bx}/${a}.bin"; COUNT=$((COUNT+1)); fi`);
+        } else {
+          out.push(`  for Y in $(seq ${a} ${b}); do`);
+          out.push(`    if [ -f "${mapFolder}/${bx}/${Y}.bin" ]; then rm -f "${mapFolder}/${bx}/${Y}.bin"; COUNT=$((COUNT+1)); fi`);
+          out.push("  done");
         }
       }
+      out.push("fi");
+    }
+    out.push("echo \"\"");
+    out.push("echo \"DONE. Deleted ${COUNT} files.\"");
+    downloadText(`hdrcade_delete_map_bins_${dt}.sh`, out.join("\n"));
+    log("Downloaded Linux delete script.");
+  }
+}
+
+/* ---------- KEEP box manipulation ---------- */
+function addKeepRectFromWorldRect(wr, subtract=false){
+  const cx1=Math.floor(Math.min(wr.x1,wr.x2)/gridSize);
+  const cy1=Math.floor(Math.min(wr.y1,wr.y2)/gridSize);
+  const cx2=Math.floor(Math.max(wr.x1,wr.x2)/gridSize);
+  const cy2=Math.floor(Math.max(wr.y1,wr.y2)/gridSize);
+
+  if(subtract){
+    for(let cx=cx1; cx<=cx2; cx++){
+      for(let cy=cy1; cy<=cy2; cy++){
+        const k=cellKey(cx,cy);
+        keepCells.delete(k);
+        manualKeepCells.delete(k);
+      }
+    }
+  } else {
+    keepRects.push({cx1,cy1,cx2,cy2});
+  }
+  recomputeKeepCells();
+  draw();
+}
+
+function removeKeepRectAtWorldPoint(wx,wy){
+  const cx=Math.floor(wx/gridSize), cy=Math.floor(wy/gridSize);
+  for(let i=keepRects.length-1;i>=0;i--){
+    const r=keepRects[i];
+    if(cx>=r.cx1 && cx<=r.cx2 && cy>=r.cy1 && cy<=r.cy2){
+      keepRects.splice(i,1);
+      recomputeKeepCells();
+      draw();
+      log("Removed a KEEP box.");
+      return true;
+    }
+  }
+  return false;
+}
+function undoKeep(){ keepRects.pop(); recomputeKeepCells(); draw(); }
+
+function addPresetRect(name, x1,y1,x2,y2){
+  const cx1=Math.floor(x1/gridSize), cy1=Math.floor(y1/gridSize);
+  const cx2=Math.floor(x2/gridSize), cy2=Math.floor(y2/gridSize);
+  keepRects.push({cx1,cy1,cx2,cy2});
+  recomputeKeepCells();
+  draw();
+  log(`Preset applied: ${name}`);
+}
+
+/* ---------- Drawing ---------- */
+function draw(){
+  ctx.clearRect(0,0,W,H);
+
+  // basemap
+  const showMap=$("chkShowMap").checked;
+  const lock=$("chkLock").checked;
+  if(showMap){
+    if(mapImgReady && lock){
+      const {tr,bl}=getLockAnchors();
+      const pTL=worldToScreen(bl.x, tr.y);
+      const pBR=worldToScreen(tr.x, bl.y);
+      ctx.globalAlpha=0.9;
+      ctx.drawImage(mapImg, pTL.x, pTL.y, (pBR.x-pTL.x), (pBR.y-pTL.y));
+      ctx.globalAlpha=1.0;
+    } else if(mapErr){
+      ctx.fillStyle="rgba(255,80,80,0.16)";
+      ctx.fillRect(12, 64, 520, 48);
+      ctx.fillStyle="#ffd0d0";
+      ctx.fillText(mapErr, 24, 94);
     }
   }
 
-  function applySafehouseProtectionFromToggles(){
-    computeSafehouseCells();
-    computeSafehouseHeat();
-
-    keep.safehouse.clear();
-    if($("chkAutoProtectSH").checked){
-      for(const k of safehouseCells) keep.safehouse.add(k);
+  // populated overlay (blue)
+  if($("chkShowPop").checked && populatedCellCounts.size){
+    for(const [k,count] of populatedCellCounts.entries()){
+      const [cx,cy]=k.split(",").map(Number);
+      const x=cx*gridSize, y=cy*gridSize;
+      const p1=worldToScreen(x,y);
+      const p2=worldToScreen(x+gridSize,y+gridSize);
+      const alpha=clamp(0.05 + 0.30*(count/populatedCellMax), 0.06, 0.35);
+      ctx.fillStyle=`rgba(87,166,255,${alpha})`;
+      ctx.fillRect(p1.x,p1.y,p2.x-p1.x,p2.y-p1.y);
     }
-    rebuildKeepAll();
-    setChips();
-    draw();
   }
 
-  function hasUnsafeSelection(){
-    let unsafeCount = 0;
-    for(const k of selectedBins){
-      const {bx,by}=parseBKey(k);
-      const cx = Math.floor((bx*8)/300);
-      const cy = Math.floor((by*8)/300);
-      const ck = cellKey(cx,cy);
-      if(safehouseCells.has(ck)) { unsafeCount++; continue; }
-      const h = safehouseHeat.get(ck) || 0;
-      if(h >= 3) { unsafeCount++; continue; }
+  // KEEP overlay (amber)
+  if(keepCells.size){
+    ctx.fillStyle="rgba(255,186,66,0.20)";
+    for(const k of keepCells){
+      const [cx,cy]=k.split(",").map(Number);
+      const x=cx*gridSize, y=cy*gridSize;
+      const p1=worldToScreen(x,y);
+      const p2=worldToScreen(x+gridSize,y+gridSize);
+      ctx.fillRect(p1.x,p1.y,p2.x-p1.x,p2.y-p1.y);
     }
-    return unsafeCount;
   }
 
-  function draw(){
-    const r = c.getBoundingClientRect();
-    ctx.clearRect(0,0,r.width,r.height);
+  // Dry-run delete overlay (red)
+  if($("chkDryRun").checked && deleteCellCounts.size){
+    let max=1;
+    for(const v of deleteCellCounts.values()) if(v>max) max=v;
+    for(const [k,v] of deleteCellCounts.entries()){
+      const [cx,cy]=k.split(",").map(Number);
+      const x=cx*gridSize, y=cy*gridSize;
+      const p1=worldToScreen(x,y);
+      const p2=worldToScreen(x+gridSize,y+gridSize);
+      const alpha=clamp(0.05 + 0.22*(v/max), 0.06, 0.28);
+      ctx.fillStyle=`rgba(255,80,80,${alpha})`;
+      ctx.fillRect(p1.x,p1.y,p2.x-p1.x,p2.y-p1.y);
+    }
+  }
 
-    if(basemap){
-      const alpha = Number($("mapOpacity").value)/100;
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.imageSmoothingEnabled = $("mapSmooth").value === "on";
+  // grid lines
+  ctx.strokeStyle="rgba(255,255,255,0.06)";
+  ctx.lineWidth=1;
+  const topLeft=screenToWorld(0,0);
+  const botRight=screenToWorld(W,H);
+  const gx0=Math.floor(topLeft.x/gridSize)*gridSize;
+  const gy0=Math.floor(topLeft.y/gridSize)*gridSize;
+  const gx1=Math.ceil(botRight.x/gridSize)*gridSize;
+  const gy1=Math.ceil(botRight.y/gridSize)*gridSize;
 
-      const bl = lock.bl, tr = lock.tr;
-      const wTiles = (tr.x - bl.x);
-      const hTiles = (bl.y - tr.y);
-      const drawW = wTiles * view.zoom;
-      const drawH = hTiles * view.zoom;
-      const sTL = worldToScreen(bl.x, tr.y);
-      ctx.drawImage(basemap, sTL.x, sTL.y, drawW, drawH);
+  for(let x=gx0; x<=gx1; x+=gridSize){
+    const p1=worldToScreen(x, topLeft.y);
+    const p2=worldToScreen(x, botRight.y);
+    ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke();
+  }
+  for(let y=gy0; y<=gy1; y+=gridSize){
+    const p1=worldToScreen(topLeft.x, y);
+    const p2=worldToScreen(botRight.x, y);
+    ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke();
+  }
 
-      ctx.restore();
+  // safehouses
+  hoveredSafehouse=null;
+  if($("chkShowSH").checked && safehouses.length){
+    const pad=safehousePad|0;
+    if(lastMouseWorld){
+      for(const sh of safehouses){
+        const inside = (lastMouseWorld.x >= sh.x - pad && lastMouseWorld.x <= sh.x + sh.w + pad &&
+                        lastMouseWorld.y >= sh.y - pad && lastMouseWorld.y <= sh.y + sh.h + pad);
+        if(inside){ hoveredSafehouse=sh; break; }
+      }
     }
 
-    if($("chkSafehouseHeat").checked && safehouseHeat.size > 0){
-      ctx.save();
-      for(const [ck, intensity] of safehouseHeat){
-        const parts = ck.split(",");
-        const cx = Number(parts[0]), cy = Number(parts[1]);
-        const s = worldToScreen(cx*300, cy*300);
-        const size = 300 * view.zoom;
-        const alpha = Math.min(0.6, 0.12 * intensity);
-        ctx.fillStyle = `rgba(255,60,60,${alpha})`;
-        ctx.fillRect(s.x, s.y, size, size);
-      }
-      ctx.restore();
-    }
+    for(const sh of safehouses){
+      const coreTL=worldToScreen(sh.x, sh.y);
+      const coreBR=worldToScreen(sh.x+sh.w, sh.y+sh.h);
 
-
-    // Bin coverage (blue): show where map .bin files exist (aggregated per 300x300 cell)
-    if($("chkShowBins") && $("chkShowBins").checked && binCellCounts.size){
-      const tlW = screenToWorld(0,0);
-      const brW = screenToWorld(r.width, r.height);
-      const minCx = Math.floor(Math.min(tlW.x, brW.x)/300)-1;
-      const maxCx = Math.floor(Math.max(tlW.x, brW.x)/300)+1;
-      const minCy = Math.floor(Math.min(tlW.y, brW.y)/300)-1;
-      const maxCy = Math.floor(Math.max(tlW.y, brW.y)/300)+1;
-
-      ctx.save();
-      for(let cx=minCx; cx<=maxCx; cx++){
-        for(let cy=minCy; cy<=maxCy; cy++){
-          const ck = cx + "," + cy;
-          const n = binCellCounts.get(ck);
-          if(!n) continue;
-          const s = worldToScreen(cx*300, cy*300);
-          const size = 300*view.zoom;
-          const a = 0.10 + 0.25 * Math.min(1, n / (binCellMax || 1));
-          ctx.fillStyle = `rgba(122,167,255,${a})`;
-          ctx.fillRect(s.x, s.y, size, size);
-        }
-      }
-      ctx.restore();
-    }
-
-    if($("chkHeat").checked){
-      ctx.save();
-      ctx.globalAlpha = 0.16;
-      ctx.fillStyle = "rgba(255,60,87,1)";
-      for(const k of selectedBins){
-        const p = parseBKey(k);
-        const s = worldToScreen(p.bx*8, p.by*8);
-        const size = 8*view.zoom;
-        ctx.fillRect(s.x, s.y, size, size);
-      }
-      rebuildKeepAll();
-      ctx.globalAlpha = 0.10;
-      ctx.fillStyle = "rgba(44,255,141,1)";
-      for(const ck of keepAll){
-        const parts = ck.split(",");
-        const cx = Number(parts[0]), cy = Number(parts[1]);
-        const s = worldToScreen(cx*300, cy*300);
-        const size = 300*view.zoom;
-        ctx.fillRect(s.x, s.y, size, size);
-      }
-      ctx.restore();
-    }
-
-    if($("chkGrid").checked && view.zoom >= Number($("minZoom").value||0.2)){
-      const spacing = gridSpacing();
-      const op = Number($("gridOpacity").value)/100;
-      ctx.save();
-      ctx.globalAlpha = op;
-      ctx.strokeStyle = "rgba(255,220,80,0.85)";
-      ctx.lineWidth = 1;
-      const tl = screenToWorld(0,0);
-      const br = screenToWorld(r.width,r.height);
-      const minX = Math.floor(Math.min(tl.x,br.x)/spacing)*spacing;
-      const maxX = Math.ceil(Math.max(tl.x,br.x)/spacing)*spacing;
-      const minY = Math.floor(Math.min(tl.y,br.y)/spacing)*spacing;
-      const maxY = Math.ceil(Math.max(tl.y,br.y)/spacing)*spacing;
-      for(let x=minX; x<=maxX; x+=spacing){
-        const s1=worldToScreen(x,minY), s2=worldToScreen(x,maxY);
-        ctx.beginPath(); ctx.moveTo(s1.x, s1.y); ctx.lineTo(s2.x, s2.y); ctx.stroke();
-      }
-      for(let y=minY; y<=maxY; y+=spacing){
-        const s1=worldToScreen(minX,y), s2=worldToScreen(maxX,y);
-        ctx.beginPath(); ctx.moveTo(s1.x, s1.y); ctx.lineTo(s2.x, s2.y); ctx.stroke();
-      }
-      ctx.restore();
-    }
-
-    if($("chkShowSH").checked && safehouseCells.size > 0){
-      ctx.save();
-      ctx.strokeStyle = "rgba(0,255,140,0.85)";
+      ctx.strokeStyle="rgba(0,255,140,0.65)";
       ctx.setLineDash([6,4]);
-      ctx.lineWidth = 2;
-      for(const ck of safehouseCells){
-        const parts = ck.split(",");
-        const cx = Number(parts[0]), cy = Number(parts[1]);
-        const s = worldToScreen(cx*300, cy*300);
-        const size = 300*view.zoom;
-        ctx.strokeRect(s.x, s.y, size, size);
+      ctx.lineWidth=2;
+      ctx.strokeRect(coreTL.x, coreTL.y, coreBR.x-coreTL.x, coreBR.y-coreTL.y);
+
+      if(pad>0){
+        ctx.strokeStyle="rgba(0,255,140,0.35)";
+        ctx.setLineDash([8,6]);
+        ctx.lineWidth=2;
+        const px=sh.x-pad, py=sh.y-pad, pw=sh.w+pad*2, ph=sh.h+pad*2;
+        const pTL=worldToScreen(px,py);
+        const pBR=worldToScreen(px+pw,py+ph);
+        ctx.strokeRect(pTL.x, pTL.y, pBR.x-pTL.x, pBR.y-pTL.y);
       }
-      ctx.restore();
-    }
 
-    ctx.save();
-    ctx.strokeStyle = "rgba(255,220,80,0.9)";
-    ctx.lineWidth = 2;
-    for(const rr of rects){
-      const rN = rectNormalize(rr);
-      const s1=worldToScreen(rN.x1,rN.y1), s2=worldToScreen(rN.x2,rN.y2);
-      ctx.strokeRect(s1.x, s1.y, s2.x-s1.x, s2.y-s1.y);
-    }
-    if(rectDraft){
-      const rN = rectNormalize(rectDraft);
-      const s1=worldToScreen(rN.x1,rN.y1), s2=worldToScreen(rN.x2,rN.y2);
-      ctx.setLineDash([6,4]);
-      ctx.strokeRect(s1.x, s1.y, s2.x-s1.x, s2.y-s1.y);
-      ctx.setLineDash([]);
-    }
-    ctx.restore();
-
-    if(protectedTowns.length > 0){
-      ctx.save();
-      ctx.font = "14px system-ui";
-      ctx.fillStyle = "rgba(255,255,255,0.85)";
-      for(const t of protectedTowns){
-        const cx = (t.cx1 + t.cx2 + 1)/2;
-        const cy = (t.cy1 + t.cy2 + 1)/2;
-        const s = worldToScreen(cx*300, cy*300);
-        ctx.fillText("🔒 " + t.name, s.x, s.y);
+      if(hoveredSafehouse===sh){
+        ctx.setLineDash([]);
+        ctx.fillStyle="rgba(0,255,140,0.08)";
+        ctx.fillRect(coreTL.x, coreTL.y, coreBR.x-coreTL.x, coreBR.y-coreTL.y);
       }
-      ctx.restore();
     }
+    ctx.setLineDash([]);
+  }
 
+  $("hudZoom").textContent = zoom.toFixed(3);
+  $("hudCenter").textContent = `${Math.round(camX)},${Math.round(camY)}`;
+  $("hudGrid").textContent = String(gridSize);
+}
+
+/* ---------- pointer events ---------- */
+canvas.addEventListener("contextmenu", (e)=>e.preventDefault());
+
+canvas.addEventListener("mousedown", (e)=>{
+  const r=canvas.getBoundingClientRect();
+  const sx=e.clientX-r.left, sy=e.clientY-r.top;
+  const w=screenToWorld(sx,sy);
+  lastMouseWorld=w;
+
+  if(e.button===2){
+    removeKeepRectAtWorldPoint(w.x,w.y);
+    return;
+  }
+  if(e.shiftKey){
+    selectionStart={x:sx,y:sy, wx:w.x, wy:w.y, subtract:(e.ctrlKey||e.metaKey)};
+    return;
+  }
+  isPanning=true;
+  panStart={sx,sy, camX,camY};
+});
+
+canvas.addEventListener("mousemove", (e)=>{
+  const r=canvas.getBoundingClientRect();
+  const sx=e.clientX-r.left, sy=e.clientY-r.top;
+  const w=screenToWorld(sx,sy);
+  lastMouseWorld=w;
+
+  if(isPanning && panStart){
+    camX = panStart.camX - (sx-panStart.sx)/zoom;
+    camY = panStart.camY - (sy-panStart.sy)/zoom;
+    draw();
+  } else if(selectionStart){
+    draw();
+    const x1=selectionStart.x, y1=selectionStart.y, x2=sx, y2=sy;
+    ctx.strokeStyle= selectionStart.subtract ? "rgba(255,80,80,0.85)" : "rgba(255,186,66,0.85)";
+    ctx.setLineDash([6,4]);
+    ctx.lineWidth=2;
+    ctx.strokeRect(Math.min(x1,x2), Math.min(y1,y2), Math.abs(x2-x1), Math.abs(y2-y1));
+    ctx.setLineDash([]);
+  } else {
+    draw();
     if(hoveredSafehouse){
-      const sh = hoveredSafehouse;
-      ctx.save();
-      ctx.strokeStyle = "rgba(0,255,140,0.95)";
-      ctx.lineWidth = 2;
-      const s1 = worldToScreen(sh.x, sh.y);
-      const s2 = worldToScreen(sh.x + sh.w, sh.y + sh.h);
-      ctx.strokeRect(s1.x, s1.y, s2.x-s1.x, s2.y-s1.y);
-      ctx.restore();
-
-      ctx.save();
-      ctx.font = "12px system-ui";
-      const label = `Safehouse: ${sh.owner || "Unknown"}`;
-      const pad = 6;
-      const w = ctx.measureText(label).width + pad*2;
-      const h = 18;
-      const bx = s1.x;
-      const by = s1.y - h - 6;
-      ctx.fillStyle = "rgba(0,0,0,0.72)";
-      ctx.strokeStyle = "rgba(0,255,140,0.95)";
-      ctx.lineWidth = 2;
-      ctx.strokeRect(bx, by, w, h);
-      ctx.fillRect(bx, by, w, h);
-      ctx.fillStyle = "rgba(216,255,232,0.95)";
-      ctx.fillText(label, bx + pad, by + 13);
-      ctx.restore();
-    }
-
-    const hoverCellKey = (()=>{
-      const m = hoverText.match(/cell=\((\-?\d+),(\-?\d+)\)/);
-      if(!m) return null;
-      return m[1] + "," + m[2];
-    })();
-    let extra = "";
-    if(hoverCellKey && safehouseHeat.has(hoverCellKey)){
-      extra = " | SH heat=" + safehouseHeat.get(hoverCellKey);
-    }
-    hud.textContent = `HDRcade • ${hoverText}${extra} • zoom=${view.zoom.toFixed(2)} • rects=${rects.length} • selected=${selectedBins.size.toLocaleString()}`;
-  }
-
-  c.addEventListener("mousemove", (e)=>{
-    const p = screenToWorld(e.offsetX, e.offsetY);
-
-    if($("chkHover").checked){
-      hoverText = `tile=(${Math.floor(p.x)},${Math.floor(p.y)}) bin=(${Math.floor(p.x/8)},${Math.floor(p.y/8)}) cell=(${Math.floor(p.x/300)},${Math.floor(p.y/300)})`;
-    } else hoverText="—";
-
-    hoveredSafehouse = null;
-    for(const sh of safehouseRects){
-      if(p.x >= sh.x && p.x <= sh.x + sh.w && p.y >= sh.y && p.y <= sh.y + sh.h){
-        hoveredSafehouse = sh;
-        break;
-      }
-    }
-
-    if(rectDraft){ rectDraft.x2=p.x; rectDraft.y2=p.y; }
-    draw();
-  });
-
-  c.addEventListener("wheel", (e)=>{
-    e.preventDefault();
-    const before = screenToWorld(e.offsetX, e.offsetY);
-    const dz = Math.sign(e.deltaY);
-    view.zoom = Math.max(0.02, Math.min(6, view.zoom * (dz>0 ? 0.9 : 1.1)));
-    const after = screenToWorld(e.offsetX, e.offsetY);
-    view.x += (before.x - after.x);
-    view.y += (before.y - after.y);
-    draw();
-  }, {passive:false});
-
-  c.addEventListener("mousedown", (e)=>{
-    if(e.shiftKey){
-      const p = screenToWorld(e.offsetX, e.offsetY);
-      rectDraft = {x1:p.x,y1:p.y,x2:p.x,y2:p.y};
-      return;
-    }
-    dragging=true; panStart={x:e.offsetX,y:e.offsetY}; dragStart={x:view.x,y:view.y};
-  });
-  window.addEventListener("mouseup", ()=>{
-    if(rectDraft){
-      const rN = rectNormalize(rectDraft);
-      if(Math.abs(rN.x2-rN.x1)>1 && Math.abs(rN.y2-rN.y1)>1){
-        rects.push(rN);
-        selectBinsFromRects();
-        log("Rect added.");
-      }
-      rectDraft=null;
-      setChips(); draw();
-      return;
-    }
-    dragging=false;
-  });
-  window.addEventListener("mousemove", (e)=>{
-    if(!dragging) return;
-    const dx = e.offsetX - panStart.x;
-    const dy = e.offsetY - panStart.y;
-    view.x = dragStart.x - dx/view.zoom;
-    view.y = dragStart.y - dy/view.zoom;
-    draw();
-  });
-
-  function selectBinsFromRects(){
-    selectedBins.clear();
-    for(const rr of rects){
-      const rN = rectNormalize(rr);
-      const minbx = Math.floor(rN.x1/8), maxbx = Math.floor(rN.x2/8);
-      const minby = Math.floor(rN.y1/8), maxby = Math.floor(rN.y2/8);
-      for(let bx=minbx; bx<=maxbx; bx++){
-        for(let by=minby; by<=maxby; by++){
-          const k = binKey(bx,by);
-          if(allBins.size>0){
-            if(allBins.has(k)) selectedBins.add(k);
-          }else{
-            selectedBins.add(k);
-          }
-        }
-      }
-    }
-    setChips();
-  }
-
-  $("btnAutoMap").addEventListener("click", autoLoadBasemap);
-  $("btnClearMap").addEventListener("click", ()=>{ basemap=null; $("mapStatus").textContent="Basemap: none"; draw(); });
-  $("btnApplyLock").addEventListener("click", ()=>{ applyCornerLockFromFields(); draw(); });
-  $("btnFitRough").addEventListener("click", fitToBinsRough);
-
-  $("chkKeep").addEventListener("change", (e)=>{ keep.enabled = e.target.checked; log("KEEP " + (keep.enabled?"enabled":"disabled")); rebuildKeepAll(); draw(); });
-  $("btnParseReplace").addEventListener("click", ()=>{ keep.manual = parseKeepText($("keepText").value); $("keepText").value = Array.from(keep.manual).sort().join("\n"); log("Parsed keep list."); rebuildKeepAll(); setChips(); draw(); });
-  $("btnParseAdd").addEventListener("click", ()=>{ const add = parseKeepText($("keepText").value); for(const k of add) keep.manual.add(k); $("keepText").value = Array.from(keep.manual).sort().join("\n"); log("Added to keep list."); rebuildKeepAll(); setChips(); draw(); });
-  $("btnKeepClear").addEventListener("click", ()=>{ keep.manual.clear(); $("keepText").value=""; log("Keep list cleared."); rebuildKeepAll(); setChips(); draw(); });
-  $("btnApplyInverse").addEventListener("click", applyInverseSelection);
-
-  $("btnAddPreset").addEventListener("click", ()=>{
-    const v = $("presetSel").value;
-    if(!v) return;
-    let xmin,xmax,ymin,ymax;
-    if(v==="louisville"){ xmin=42; xmax=56; ymin=2; ymax=16; }
-    if(v==="muldraugh"){ xmin=32; xmax=38; ymin=34; ymax=41; }
-    let n=0;
-    for(let x=xmin;x<=xmax;x++) for(let y=ymin;y<=ymax;y++){ keep.preset.add(cellKey(x,y)); n++; }
-    log("Preset added: " + v + " ("+n+" cells)");
-    rebuildKeepAll();
-    setChips(); draw();
-  });
-
-  $("btnExportKeep").addEventListener("click", ()=>{
-    const payload = {schemaVersion:1, createdUtc:new Date().toISOString(), manual:[...keep.manual], preset:[...keep.preset]};
-    const blob = new Blob([JSON.stringify(payload,null,2)], {type:"application/json"});
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "HDRcade_KeepCells.json";
-    a.click();
-    log("Exported keep list JSON.");
-  });
-  $("btnImportKeep").addEventListener("click", ()=>$("keepFileIn").click());
-  $("keepFileIn").addEventListener("change", async (e)=>{
-    const f = e.target.files && e.target.files[0];
-    if(!f) return;
-    try{
-      const obj = JSON.parse(await f.text());
-      keep.manual = new Set(obj.manual || []);
-      keep.preset = new Set(obj.preset || []);
-      $("keepText").value = Array.from(keep.manual).sort().join("\n");
-      log("Imported keep list JSON.");
-      rebuildKeepAll();
-      setChips(); draw();
-    }catch(err){ log("Import failed: "+err); }
-  });
-
-  $("btnAddRect").addEventListener("click", ()=>{
-    const raw = $("pasteCoords").value || "";
-    const nums = Array.from(raw.matchAll(/-?\d+/g)).map(m=>Number(m[0]));
-    if(nums.length<4){ log("Paste needs 4 numbers."); return; }
-    rects.push(rectNormalize({x1:nums[0],y1:nums[1],x2:nums[2],y2:nums[3]}));
-    selectBinsFromRects();
-    log("Rect added from pasted coords.");
-    draw();
-  });
-  $("btnClearRects").addEventListener("click", ()=>{ rects=[]; selectedBins.clear(); log("Rects cleared."); setChips(); draw(); });
-
-  $("btnGuide").addEventListener("click", ()=>{ $("guideModal").style.display="flex"; });
-  $("btnCloseGuide").addEventListener("click", ()=>{ $("guideModal").style.display="none"; });
-  $("guideModal").addEventListener("click", (e)=>{ if(e.target.id==="guideModal") $("guideModal").style.display="none"; });
-
-  function syncGridUI(){
-    const gt = $("gridType").value;
-    $("gridCustom").disabled = (gt !== "custom");
-  }
-  $("gridType").addEventListener("change", ()=>{ syncGridUI(); draw(); });
-  syncGridUI();
-
-  $("chkLegendMobile").addEventListener("change", (e)=>{
-    $("legend").style.display = e.target.checked ? "block" : "none";
-  });
-  function syncLegendToScreen(){
-    if(window.innerWidth < 900){
-      $("chkLegendMobile").checked = false;
-      $("legend").style.display = "none";
+      const sh=hoveredSafehouse;
+      const tip = `<b>Safehouse</b><br>
+Owner: <b>${escapeHtml(sh.owner||"")}</b><br>
+Town: ${escapeHtml(sh.town||"")}<br>
+${sh.name?("Name: "+escapeHtml(sh.name)+"<br>"):""}
+${(sh.members&&sh.members.length)?("Members: "+escapeHtml(sh.members.join(", "))):""}`;
+      showTooltipAt(sx+16, sy+16, tip);
     } else {
-      $("legend").style.display = "block";
+      hideTooltipIfNotPinned();
     }
   }
-  window.addEventListener("resize", syncLegendToScreen);
+});
 
-  function closeExportModal(){ $("osModal").style.display="none"; }
-  $("btnExport").addEventListener("click", ()=>{
-    if(selectedBins.size===0){ log("Nothing selected."); return; }
-    const unsafe = hasUnsafeSelection();
-    if(unsafe > 0){
-      alert(
-        "UNSAFE DELETE BLOCKED\n\n" +
-        "Your selection overlaps safehouses / high-risk cells.\n" +
-        `Unsafe bins detected: ${unsafe.toLocaleString()}\n\n` +
-        "Fix: remove those areas from your selection (recommended)."
-      );
-      log(`Export blocked: unsafe selection detected (unsafe bins=${unsafe}).`);
-      return;
-    }
-
-    const remember = localStorage.getItem("HDRcade_OS") || "";
-    if(remember==="win"){ exportScript("win"); return; }
-    if(remember==="lin"){ exportScript("lin"); return; }
-    $("osModal").style.display="flex";
-  });
-  $("btnCancel").addEventListener("click", closeExportModal);
-  $("osModal").addEventListener("click", (e)=>{ if(e.target.id==="osModal") closeExportModal(); });
-  $("btnWin").addEventListener("click", ()=>exportScript("win"));
-  $("btnLin").addEventListener("click", ()=>exportScript("lin"));
-
-  function exportScript(osKind){
-    const dry = $("chkDryRun").checked;
-    const remember = $("chkRememberOS").checked;
-    if(remember) localStorage.setItem("HDRcade_OS", osKind);
-    closeExportModal();
-
-    const files = Array.from(selectedBins).sort().map(k=>{
-      const p = parseBKey(k);
-      return `map/${p.bx}/${p.by}.bin`;
-    });
-
-    if(osKind==="win"){
-      const lines = [
-        "@echo off",
-        "setlocal EnableExtensions",
-        "if not exist map\\ ( echo ERROR: Run this from your SAVE ROOT (the folder containing map\\) & exit /b 1 )",
-        "echo HDRcade PZ B42 Map Cleaner - delete script",
-        `echo Selected bins: ${files.length}`,
-        ""
-      ];
-      if(dry){
-        lines.push("echo DRY RUN (no deletes).");
-        for(const f of files) lines.push(`echo WOULD DELETE: \"${f.replace(/\//g,"\\")}\"`);
-      }else{
-        lines.push("echo Deleting... (Ctrl+C to cancel)");
-        for(const f of files) lines.push(`if exist \"${f.replace(/\//g,"\\")}\" del /f /q \"${f.replace(/\//g,"\\")}\"`);
-        lines.push("for /d %%D in (map\\*) do ( rmdir /s /q \"%%D\" 2>nul )");
-      }
-      lines.push("echo Done.");
-      const blob = new Blob([lines.join("\r\n")], {type:"text/plain"});
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "HDRcade_Delete_MapBins.bat";
-      a.click();
-      log("Exported .bat.");
-      return;
-    }
-
-    if(osKind==="lin"){
-      const lines = [
-        "#!/usr/bin/env bash",
-        "set -euo pipefail",
-        'if [ ! -d "map" ]; then echo "ERROR: Run this from your SAVE ROOT (the folder containing map/)"; exit 1; fi',
-        'echo "HDRcade PZ B42 Map Cleaner - delete script"',
-        `echo "Selected bins: ${files.length}"`,
-        ""
-      ];
-      if(dry){
-        lines.push('echo "DRY RUN (no deletes)."');
-        for(const f of files) lines.push(`echo 'WOULD DELETE: \"${f}\"'`);
-      }else{
-        lines.push('echo "Deleting... (Ctrl+C to cancel)"');
-        for(const f of files) lines.push(`rm -f -- \"${f}\"`);
-        lines.push('find map -type d -empty -delete 2>/dev/null || true');
-      }
-      lines.push('echo "Done."');
-      const blob = new Blob([lines.join("\n")], {type:"text/plain"});
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "HDRcade_Delete_MapBins.sh";
-      a.click();
-      log("Exported .sh.");
-      return;
-    }
-  }
-
-  async function deleteSelectedBins(){
-    if(selectedBins.size===0){ log("Nothing selected."); return; }
-    if(!fsRoot){ log("Direct delete requires Read/Write folder picker. Use Export script."); return; }
-
-    const unsafe = hasUnsafeSelection();
-    if(unsafe > 0){
-      alert(
-        "UNSAFE DELETE BLOCKED\n\n" +
-        "Your selection overlaps safehouses / high-risk cells.\n" +
-        `Unsafe bins detected: ${unsafe.toLocaleString()}\n\n` +
-        "Fix: remove those areas from your selection (recommended)."
-      );
-      log(`Direct delete blocked: unsafe selection detected (unsafe bins=${unsafe}).`);
-      return;
-    }
-
-    if(!confirm(`Delete ${selectedBins.size.toLocaleString()} bin files from map/?\n\nStop server + BACK UP first.`)) return;
-    let deleted=0, missing=0, errs=0;
-    try{
-      const mapDir = await fsRoot.getDirectoryHandle("map", {create:false});
-      for(const k of selectedBins){
-        const p = parseBKey(k);
-        try{
-          const sub = await mapDir.getDirectoryHandle(String(p.bx), {create:false});
-          await sub.removeEntry(String(p.by)+".bin");
-          deleted++;
-        }catch(e){
-          if(String(e).includes("NotFoundError")) missing++; else errs++;
-        }
-      }
-    }catch(e){ log("Delete failed: "+e); return; }
-    log(`Direct delete done. deleted=${deleted} missing=${missing} errors=${errs}`);
-  }
-  $("btnDelete").addEventListener("click", deleteSelectedBins);
-
-  function sleep0(){ return new Promise(r=>setTimeout(r,0)); }
-
-  async function scanMapBinsRW(root){
-    allBins.clear();
-    resetBinCoverage();
-    const mapDir = await root.getDirectoryHandle("map", {create:false});
-    let folderCount = 0;
-    for await (const entry of mapDir.entries()){
-      const name = entry[0];
-      const handle = entry[1];
-      if(handle.kind !== "directory") continue;
-      const bx = Number(name);
-      if(!Number.isFinite(bx)) continue;
-
-      for await (const subEntry of handle.entries()){
-        const fname = subEntry[0];
-        const fhandle = subEntry[1];
-        if(fhandle.kind !== "file") continue;
-        if(!fname.endsWith(".bin")) continue;
-        const by = Number(fname.replace(".bin",""));
-        if(!Number.isFinite(by)) continue;
-        trackBin(bx,by);
-      }
-      folderCount++;
-      if(folderCount % 40 === 0) await sleep0();
-    }
-  }
-
-  async function loadRW(){
-    try{
-      if(!window.showDirectoryPicker){ log("Read/Write not supported here. Use Read-Only or Index."); return; }
-      fsRoot = await window.showDirectoryPicker({mode:"readwrite"});
-      await scanMapBinsRW(fsRoot);
-      usingIndex = false;
-      $("fastBadge").style.display = "none";
-      $("saveHint").textContent = "Loaded (Read/Write).";
-      log("Save folder loaded (Read/Write).");
-      setChips(); maybeWarnLargeServer(); draw();
-    }catch(e){ log("RW load cancelled/failed: "+(e && e.message ? e.message : e)); }
-  }
-
-  function loadRO(files){
-    fsRoot=null; allBins.clear();
-    let count=0;
-    for(const f of files){
-      const p = f.webkitRelativePath || f.name || "";
-      const m = p.match(/(?:^|\/)map\/(\d+)\/(\d+)\.bin$/i);
-      if(m){ trackBin(Number(m[1]),Number(m[2])); count++; }
-    }
-    usingIndex = false;
-    $("fastBadge").style.display = "none";
-    $("saveHint").textContent = `Loaded (Read-Only). Found ${count.toLocaleString()} bin files.`;
-    log(`Read-only loaded. Found ${count.toLocaleString()} bins.`);
-    setChips(); maybeWarnLargeServer(); draw();
-  }
-
-  $("btnRW").addEventListener("click", loadRW);
-  $("btnRO").addEventListener("click", ()=>$("roPicker").click());
-  $("roPicker").addEventListener("change", (e)=>{
-    const files = e.target.files ? Array.from(e.target.files) : [];
-    if(files.length===0){ log("RO load: no files."); return; }
-    loadRO(files);
-  });
-
-  function validateIndex(d){
-    if(d.schemaVersion !== 1) throw new Error("Unsupported schemaVersion");
-    if(!d.bins || !d.world) throw new Error("Invalid index file");
-  }
-
-  function applyIndex(d){
-    indexData = d;
-    usingIndex = true;
-    fsRoot = null;
-    allBins.clear();
-    resetBinCoverage();
-    let total = 0;
-    for(const bx in d.bins){
-      const arr = d.bins[bx];
-      if(!Array.isArray(arr)) continue;
-      for(const by of arr){
-        trackBin(Number(bx), Number(by));
-        total++;
-      }
-    }
-
-    safehouseRects = Array.isArray(d.safehouses) ? d.safehouses : [];
-    hoveredSafehouse = null;
-
-    if(d.world && Number.isFinite(d.world.minBx) && Number.isFinite(d.world.maxBx)){
-      view.x = ((d.world.minBx + d.world.maxBx + 1)/2) * 8;
-      view.y = ((d.world.minBy + d.world.maxBy + 1)/2) * 8;
-    }
-
-    $("fastBadge").style.display = "inline-flex";
-    $("indexStatus").textContent = `Index loaded (${(d.world.totalBins || total).toLocaleString()} bins) • safehouses=${safehouseRects.length.toLocaleString()}`;
-    log(`Index loaded. bins=${(d.world.totalBins || total).toLocaleString()} safehouses=${safehouseRects.length.toLocaleString()}`);
-
-    applySafehouseProtectionFromToggles();
-    setChips(); maybeWarnLargeServer(); draw();
-  }
-
-  $("btnLoadIndex").addEventListener("click", ()=>$("indexFile").click());
-  $("indexFile").addEventListener("change", async (e)=>{
-    const f = e.target.files && e.target.files[0];
-    if(!f) return;
-    try{
-      const obj = JSON.parse(await f.text());
-      validateIndex(obj);
-      applyIndex(obj);
-    }catch(err){
-      log("Index load failed: " + err);
-      alert("Failed to load index: " + err);
-    }
-  });
-
-  $("chkAutoProtectSH").addEventListener("change", ()=>{
-    applySafehouseProtectionFromToggles();
-    log("Auto-protect safehouses: " + ($("chkAutoProtectSH").checked ? "ON" : "OFF"));
-  });
-  $("chkShowSH").addEventListener("change", ()=>draw());
-  $("chkSafehouseHeat").addEventListener("change", ()=>draw());
-
-  function clampTooltip(box, x, y){
-    const pad = 8;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const bw = box.offsetWidth;
-    const bh = box.offsetHeight;
-
-    if(x + bw + pad > vw) x = vw - bw - pad;
-    if(x < pad) x = pad;
-    if(y + bh + pad > vh) y = vh - bh - pad;
-    if(y < pad) y = pad;
-
-    return {x,y};
-  }
-
-  function tooltipInit(){
-    let pinned=false;
-
-    function setContent(el){
-      const raw = el.getAttribute("data-tip") || "";
-      tipBox.innerHTML = raw.replace(/\n/g,"<br>");
-    }
-
-    function basePosition(el){
-      const r = el.getBoundingClientRect();
-      let x = r.left;
-      let y = r.bottom + 8;
-      if (r.bottom > window.innerHeight * 0.7) y = r.top - 8;
-      return {x,y};
-    }
-
-    function show(el){
-      setContent(el);
-      tipBox.style.display="block";
-      tipBox.style.visibility="hidden";
-
-      let pos = basePosition(el);
-      tipBox.style.left = pos.x + "px";
-      tipBox.style.top  = pos.y + "px";
-
-      const clamped = clampTooltip(tipBox, pos.x, pos.y);
-      tipBox.style.left = clamped.x + "px";
-      tipBox.style.top  = clamped.y + "px";
-      tipBox.style.visibility="visible";
-    }
-
-    function hide(){ if(!pinned) tipBox.style.display="none"; }
-
-    document.querySelectorAll(".tip, .legTip").forEach(el=>{
-      el.addEventListener("mouseenter", ()=>{ if(!pinned) show(el); });
-      el.addEventListener("mouseleave", hide);
-      el.addEventListener("click", (e)=>{
-        e.preventDefault(); e.stopPropagation();
-        pinned = !pinned;
-        if(pinned) show(el); else tipBox.style.display="none";
-      }, {passive:false});
-      el.addEventListener("touchstart", (e)=>{
-        e.preventDefault(); e.stopPropagation();
-        pinned = !pinned;
-        if(pinned) show(el); else tipBox.style.display="none";
-      }, {passive:false});
-    });
-
-    document.addEventListener("click", ()=>{ pinned=false; tipBox.style.display="none"; });
-    window.addEventListener("scroll", ()=>{ if(!pinned) tipBox.style.display="none"; }, {passive:true});
-    window.addEventListener("resize", ()=>{ if(!pinned) tipBox.style.display="none"; }, {passive:true});
-
-    log("Tooltips ready ("+document.querySelectorAll(".tip").length+").");
-  }
-
-  function init(){
-    setChips();
-    tooltipInit();
-    resize();
-    syncLegendToScreen();
-
-    applyCornerLockFromFields();
-    view.x = (lock.bl.x + lock.tr.x)/2;
-    view.y = (lock.bl.y + lock.tr.y)/2;
-
-    autoLoadBasemap();
+canvas.addEventListener("mouseup", (e)=>{
+  if(selectionStart){
+    const r=canvas.getBoundingClientRect();
+    const sx=e.clientX-r.left, sy=e.clientY-r.top;
+    const w2=screenToWorld(sx,sy);
+    addKeepRectFromWorldRect({x1:selectionStart.wx,y1:selectionStart.wy,x2:w2.x,y2:w2.y}, selectionStart.subtract);
+    selectionStart=null;
     draw();
+    return;
   }
-  document.addEventListener("DOMContentLoaded", init);
-})();
+  isPanning=false;
+  panStart=null;
+});
+
+canvas.addEventListener("wheel", (e)=>{
+  e.preventDefault();
+  const r=canvas.getBoundingClientRect();
+  const sx=e.clientX-r.left, sy=e.clientY-r.top;
+  const factor = Math.exp(-e.deltaY * 0.0012);
+  setZoom(zoom*factor, {x:sx,y:sy});
+  draw();
+}, {passive:false});
+
+window.addEventListener("keydown", (e)=>{
+  if(e.key==="Backspace" || e.key==="Delete"){
+    undoKeep();
+  }
+});
+
+/* ---------- tooltips (robust, clamped) ---------- */
+let tooltipPinned=false;
+function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+function showTooltipAt(px,py, html){
+  const box=$("tooltipBox");
+  box.innerHTML=html.replace(/\n/g,"<br>");
+  box.style.display="block";
+  const pad=10;
+  box.style.left="0px"; box.style.top="0px";
+  const r=box.getBoundingClientRect();
+  let x=px, y=py;
+  if(x + r.width > window.innerWidth - pad) x = window.innerWidth - pad - r.width;
+  if(y + r.height > window.innerHeight - pad) y = window.innerHeight - pad - r.height;
+  x=Math.max(pad,x); y=Math.max(pad,y);
+  box.style.left=x+"px"; box.style.top=y+"px";
+}
+function hideTooltipIfNotPinned(){
+  if(tooltipPinned) return;
+  $("tooltipBox").style.display="none";
+}
+document.addEventListener("click", ()=>{ tooltipPinned=false; $("tooltipBox").style.display="none"; });
+
+function initTipElements(){
+  document.querySelectorAll(".tip").forEach(el=>{
+    el.addEventListener("mouseenter", ()=>{
+      if(tooltipPinned) return;
+      const raw=el.getAttribute("data-tip")||"";
+      if(!raw) return;
+      const r=el.getBoundingClientRect();
+      showTooltipAt(r.left, r.bottom+10, escapeHtml(raw).replace(/\\n/g,"<br>"));
+    });
+    el.addEventListener("mouseleave", ()=>{ hideTooltipIfNotPinned(); });
+    el.addEventListener("click",(e)=>{
+      const raw=el.getAttribute("data-tip")||"";
+      if(!raw) return;
+      e.preventDefault(); e.stopPropagation();
+      tooltipPinned=!tooltipPinned;
+      if(tooltipPinned){
+        const r=el.getBoundingClientRect();
+        showTooltipAt(r.left, r.bottom+10, escapeHtml(raw).replace(/\\n/g,"<br>"));
+      } else $("tooltipBox").style.display="none";
+    }, {passive:false});
+    el.addEventListener("touchstart",(e)=>{
+      const raw=el.getAttribute("data-tip")||"";
+      if(!raw) return;
+      e.preventDefault(); e.stopPropagation();
+      tooltipPinned=!tooltipPinned;
+      if(tooltipPinned){
+        const r=el.getBoundingClientRect();
+        showTooltipAt(r.left, r.bottom+10, escapeHtml(raw).replace(/\\n/g,"<br>"));
+      } else $("tooltipBox").style.display="none";
+    }, {passive:false});
+  });
+}
+
+/* ---------- load json ---------- */
+async function loadJsonFromUser(){
+  const inp=document.createElement("input");
+  inp.type="file";
+  inp.accept=".json,application/json";
+  return new Promise((resolve)=>{
+    inp.onchange=async ()=>{
+      const f=inp.files[0];
+      if(!f){ resolve(null); return; }
+      const txt=await f.text();
+      try{ resolve(JSON.parse(txt)); } catch(err){ resolve({__error:String(err)}); }
+    };
+    inp.click();
+  });
+}
+function validateIndex(j){
+  if(!j || typeof j!=="object") return "Not a JSON object.";
+  if(!j.bins_by_x) return "Missing bins_by_x.";
+  return null;
+}
+function ingestIndex(j){
+  indexData=j;
+  binsByX.clear();
+  binsCount = 0;
+  binTileSize = Number(j.bin_tile_size || 8) || 8;
+
+  for(const k of Object.keys(j.bins_by_x)){
+    const bx=Number(k);
+    if(!Number.isFinite(bx)) continue;
+    const ranges=j.bins_by_x[k];
+    if(!Array.isArray(ranges)) continue;
+    const norm=[];
+    for(const r of ranges){
+      if(!Array.isArray(r) || r.length<2) continue;
+      const a=Number(r[0]), b=Number(r[1]);
+      if(Number.isFinite(a)&&Number.isFinite(b) && b>=a){
+        norm.push([a|0,b|0]);
+        binsCount += (b-a+1);
+      }
+    }
+    if(norm.length) binsByX.set(bx, norm);
+  }
+
+  safehouses = Array.isArray(j.safehouses) ? j.safehouses : [];
+  $("statBins").textContent = String(binsCount);
+  $("fastStats").textContent = binsCount>250000
+    ? `Index loaded: ${binsCount.toLocaleString()} bins. (Large save: index recommended — you're doing it right.)`
+    : `Index loaded: ${binsCount.toLocaleString()} bins.`;
+
+  log(`Loaded save_index.json. bins=${binsCount} safehouses=${safehouses.length}`);
+
+  recomputePopulatedCells();
+  buildProtectedBins();
+  recomputeKeepCells();
+  clearDelete();
+  draw();
+}
+
+function downloadText(filename, content){
+  const blob=new Blob([content], {type:"text/plain"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url; a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1500);
+}
+
+function saveKeepJson(){
+  const payload={
+    version:1,
+    grid_size:gridSize,
+    keep_rects:keepRects,
+    manual_keep:Array.from(manualKeepCells),
+    safehouse_pad:Number($("shPad").value||0)|0,
+    lock_on:$("chkLock").checked,
+    lock_tr:$("lockTR").value,
+    lock_bl:$("lockBL").value
+  };
+  const dt=new Date().toISOString().slice(0,19).replace(/[:T]/g,"-");
+  downloadText(`hdrcade_keep_${dt}.json`, JSON.stringify(payload,null,2));
+  log("Saved KEEP json.");
+}
+
+async function loadKeepJson(){
+  const j=await loadJsonFromUser();
+  if(!j || j.__error){ log("Failed to load KEEP json."); return; }
+  keepRects = Array.isArray(j.keep_rects)? j.keep_rects : [];
+  manualKeepCells = new Set(Array.isArray(j.manual_keep)? j.manual_keep : []);
+  if(Number.isFinite(j.safehouse_pad)) $("shPad").value = String(Math.max(0, j.safehouse_pad|0));
+  if(typeof j.lock_tr==="string") $("lockTR").value=j.lock_tr;
+  if(typeof j.lock_bl==="string") $("lockBL").value=j.lock_bl;
+  if(typeof j.lock_on==="boolean") $("chkLock").checked=j.lock_on;
+  if(Number.isFinite(j.grid_size)){
+    $("gridSize").value = String(j.grid_size);
+    gridSize = Number($("gridSize").value)||300;
+    recomputePopulatedCells();
+  }
+  buildProtectedBins();
+  recomputeKeepCells();
+  clearDelete();
+  draw();
+  log("Loaded KEEP json.");
+}
+
+/* ---------- UI wires ---------- */
+$("btnLoadIndex").onclick = async ()=>{
+  const j=await loadJsonFromUser();
+  if(!j) return;
+  if(j.__error){ $("fastStats").textContent="JSON parse error: "+j.__error; return; }
+  const err=validateIndex(j);
+  if(err){ $("fastStats").textContent="Invalid index: "+err; return; }
+  ingestIndex(j);
+};
+
+$("gridSize").onchange = ()=>{
+  gridSize = Number($("gridSize").value)||300;
+  recomputePopulatedCells();
+  recomputeKeepCells();
+  clearDelete();
+  draw();
+};
+
+$("chkShowPop").onchange=()=>draw();
+$("chkShowMap").onchange=()=>draw();
+$("chkLock").onchange=()=>draw();
+$("lockTR").onchange=()=>draw();
+$("lockBL").onchange=()=>draw();
+
+$("btnClearKeep").onclick=()=>{ keepRects=[]; manualKeepCells.clear(); recomputeKeepCells(); clearDelete(); draw(); log("Cleared KEEP."); };
+$("btnUndoKeep").onclick=()=>{ undoKeep(); clearDelete(); log("Undo KEEP."); };
+$("btnSaveKeep").onclick=saveKeepJson;
+$("btnLoadKeep").onclick=loadKeepJson;
+$("btnApplyKeepText").onclick=()=>{ parseKeepText(); clearDelete(); log("Applied keep list."); };
+
+$("chkShowSH").onchange=()=>draw();
+$("chkAutoProtectSH").onchange=()=>{ recomputeKeepCells(); clearDelete(); draw(); };
+$("shPad").addEventListener("input", ()=>{ buildProtectedBins(); clearDelete(); draw(); });
+
+$("btnInverse").onclick=()=>computeDeleteFromInverse();
+$("btnClearDelete").onclick=()=>{ clearDelete(); $("exportWarn").textContent=""; draw(); log("Cleared DELETE."); };
+
+$("btnExport").onclick=()=>{ $("osModal").style.display="flex"; };
+$("btnExportCancel").onclick=()=>{ $("osModal").style.display="none"; };
+$("btnExportWin").onclick=()=>{ $("osModal").style.display="none"; exportScript("win"); };
+$("btnExportLinux").onclick=()=>{ $("osModal").style.display="none"; exportScript("linux"); };
+
+$("btnPresetLouisville").onclick=()=>{ addPresetRect("Louisville", 10500, 2500, 15500, 6500); clearDelete(); };
+$("btnPresetMuldraugh").onclick=()=>{ addPresetRect("Muldraugh", 9800, 8500, 11500, 10400); clearDelete(); };
+
+$("btnResetView").onclick=()=>{ camX=9000; camY=8000; zoom=0.08; draw(); };
+
+$("btnToggleLegend").onclick=()=>{
+  const el=$("legend");
+  el.style.display = (el.style.display==="none") ? "block" : "none";
+};
+$("btnLegendMobile").onclick=()=>{
+  const el=$("legend");
+  const show = (el.style.display==="none" || !el.style.display);
+  el.style.display = show ? "block" : "none";
+};
+
+initTipElements();
+resize();
+draw();
 </script>
 </body>
 </html>

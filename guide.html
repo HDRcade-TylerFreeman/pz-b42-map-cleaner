@@ -1,43 +1,68 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>HDRcade PZ B42 Map Cleaner — Guide</title>
-  <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif; line-height:1.45; margin:20px; max-width:980px}
-    code{background:#f3f4f6; padding:2px 6px; border-radius:8px}
-    h1{margin-top:0}
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>HDRcade PZ B42 Map Cleaner — Guide</title>
+<style>
+  body{margin:0; font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu; background:#0b0f14; color:#e6eef9;}
+  .wrap{max-width:920px; margin:0 auto; padding:20px;}
+  h1{margin:0 0 10px 0;}
+  h2{margin-top:22px;}
+  code,pre{background:#0a111a; border:1px solid #203044; border-radius:10px; padding:2px 6px;}
+  pre{padding:12px; overflow:auto;}
+  a{color:#57a6ff; text-decoration:none}
+  a:hover{text-decoration:underline}
+  .muted{color:#9fb1c6}
+  .warn{color:#ffcc66}
+</style>
 </head>
 <body>
+<div class="wrap">
   <h1>HDRcade PZ B42 Map Cleaner (42.13+) — Guide</h1>
+  <p class="muted">This tool helps you delete <code>map/</code> coordinate <code>.bin</code> files in a controlled way.</p>
 
-  <h2>What this tool deletes</h2>
-  <p>Only map bin files: <code>map/&lt;binX&gt;/&lt;binY&gt;.bin</code> (each bin = 8×8 tiles)</p>
-
-  <h2>Safe workflow</h2>
+  <h2>Quick start</h2>
   <ol>
-    <li>Stop the server</li>
-    <li>Back up the save folder</li>
-    <li>Load your save folder (or load a Save Index .json)</li>
-    <li>Use KEEP Cells / presets / safehouse protection to protect bases and towns</li>
-    <li>Use dry-run heatmap to review</li>
-    <li>Export a delete script and run it from your save root (where <code>map/</code> exists)</li>
-    <li>Restart server</li>
+    <li>Put your <code>map.jpg</code> next to <code>index.html</code>.</li>
+    <li>Run the helper in <code>helper/</code> to generate <code>save_index.json</code>.</li>
+    <li>Open <code>index.html</code> using localhost (recommended) or GitHub Pages.</li>
+    <li>Click <b>Load save_index.json</b>.</li>
+    <li>Use <b>Shift + Drag</b> to add KEEP boxes.</li>
+    <li>Click <b>Apply inverse selection</b> then <b>Export delete script</b>.</li>
   </ol>
 
-  <h2>Fast Mode (recommended for big servers)</h2>
-  <p>If your save has hundreds of thousands of bin files, scanning in the browser can be slow or unstable. Use the Python helper to generate a Save Index (.json), then load it in the tool.</p>
-
-  <h2>GitHub Pages basemap gotcha</h2>
-  <p>GitHub Pages is case-sensitive. Your basemap must be named exactly <code>map.jpg</code> and be in the same folder as <code>index.html</code>.</p>
-
-  <h2>Terminology</h2>
+  <h2>Selection controls</h2>
   <ul>
-    <li><b>Tile</b>: world coordinate (what b42map shows)</li>
-    <li><b>Bin</b>: 8×8 tiles stored as a <code>.bin</code> file</li>
-    <li><b>Cell</b>: 300×300 tiles (useful for keeping regions)</li>
+    <li><b>Drag</b> = pan</li>
+    <li><b>Wheel</b> = zoom</li>
+    <li><b>Shift + Drag</b> = add KEEP box</li>
+    <li><b>Ctrl + Shift + Drag</b> = subtract KEEP box</li>
+    <li><b>Right-click</b> inside a KEEP box = remove that box</li>
+    <li><b>Backspace/Delete</b> = undo last KEEP box</li>
   </ul>
+
+  <h2>Safehouses</h2>
+  <p>Safehouses are extracted from <code>map_meta.bin</code> by the helper and drawn as green dashed rectangles.</p>
+  <p><b>Safehouse padding</b> expands protection by N tiles. Default is 0. Padding is shown as lighter green dashed outline.</p>
+
+  <h2>Safety</h2>
+  <ul>
+    <li>Export is blocked if your delete plan overlaps a protected safehouse area.</li>
+    <li>The script checks that you run it from a folder containing <code>map/</code> before deleting anything.</li>
+    <li>Always back up your save first.</li>
+  </ul>
+
+  <h2>GitHub Pages note</h2>
+  <p class="warn">Browsers can’t scan your filesystem on GitHub Pages. Use Fast Mode with the helper.</p>
+
+  <h2>Links</h2>
+  <p>
+    <a href="https://steamcommunity.com/id/HDRcade/myworkshopfiles/?appid=108600" target="_blank" rel="noopener">Workshop</a> •
+    <a href="https://patreon.com/HDRcade" target="_blank" rel="noopener">Patreon</a> •
+    <a href="https://ko-fi.com/HDRcade" target="_blank" rel="noopener">Ko-fi</a> •
+    <a href="https://pine.host/hdrcade" target="_blank" rel="noopener">Hosting</a>
+  </p>
+</div>
 </body>
 </html>
