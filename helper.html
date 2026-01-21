@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>HDRcade Python Helper — Save Index</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif; line-height:1.45; margin:20px; max-width:980px}
+    code{background:#f3f4f6; padding:2px 6px; border-radius:8px}
+    h1{margin-top:0}
+    .box{padding:12px 14px; border:1px solid #ddd; border-radius:12px; background:#fafafa}
+  </style>
+</head>
+<body>
+  <h1>HDRcade Python Helper — Save Index (.json)</h1>
+
+  <div class="box">
+    <p><b>Purpose:</b> scan your save’s <code>map/</code> folder using native filesystem traversal (fast), output a compact <code>pz_map_index.json</code>, then load it in the web tool’s <b>Index / Fast Mode</b>.</p>
+    <p><b>Why:</b> browser folder scans can freeze on very large servers (hundreds of thousands / millions of bin files).</p>
+  </div>
+
+  <h2>What the index enables</h2>
+  <ul>
+    <li>Instant bin availability (no browser scan)</li>
+    <li>Safehouse overlay + hover owner names</li>
+    <li>Auto-protect safehouse cells (KEEP)</li>
+    <li>Safehouse proximity heatmap + legend</li>
+    <li>Unsafe delete blocking</li>
+  </ul>
+
+  <h2>Coming next</h2>
+  <p>The helper scripts will be provided as:</p>
+  <ul>
+    <li><code>pz_build_map_index.py</code></li>
+    <li><code>build_map_index.bat</code> (Windows wrapper)</li>
+    <li><code>build_map_index.sh</code> (Linux wrapper)</li>
+  </ul>
+
+  <p>Once generated, upload <code>pz_map_index.json</code> in the tool under <b>Index / Fast Mode</b>.</p>
+</body>
+</html>

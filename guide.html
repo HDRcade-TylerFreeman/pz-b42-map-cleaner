@@ -5,38 +5,39 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>HDRcade PZ B42 Map Cleaner — Guide</title>
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif; line-height:1.45; margin:20px; max-width:900px}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif; line-height:1.45; margin:20px; max-width:980px}
     code{background:#f3f4f6; padding:2px 6px; border-radius:8px}
     h1{margin-top:0}
   </style>
 </head>
 <body>
   <h1>HDRcade PZ B42 Map Cleaner (42.13+) — Guide</h1>
-  <p>This tool deletes <b>only</b> map bin files: <code>map/&lt;binX&gt;/&lt;binY&gt;.bin</code></p>
+
+  <h2>What this tool deletes</h2>
+  <p>Only map bin files: <code>map/&lt;binX&gt;/&lt;binY&gt;.bin</code> (each bin = 8×8 tiles)</p>
 
   <h2>Safe workflow</h2>
   <ol>
-    <li>Stop your server</li>
+    <li>Stop the server</li>
     <li>Back up the save folder</li>
-    <li>Load the save folder (the folder containing <code>map/</code>)</li>
-    <li>Draw rectangles / or set Keep Cells</li>
-    <li>Use Dry-run heatmap to review</li>
-    <li>Export a script and run it from the save root</li>
+    <li>Load your save folder (or load a Save Index .json)</li>
+    <li>Use KEEP Cells / presets / safehouse protection to protect bases and towns</li>
+    <li>Use dry-run heatmap to review</li>
+    <li>Export a delete script and run it from your save root (where <code>map/</code> exists)</li>
     <li>Restart server</li>
   </ol>
 
-  <h2>Basemap</h2>
-  <p>Put <code>map.jpg</code> next to <code>index.html</code>.</p>
-  <ul>
-    <li>On GitHub Pages, file names are case-sensitive: it must be exactly <code>map.jpg</code>.</li>
-    <li>Corner lock TR/BL is ON by default and assumes HDRcade’s map extents.</li>
-  </ul>
+  <h2>Fast Mode (recommended for big servers)</h2>
+  <p>If your save has hundreds of thousands of bin files, scanning in the browser can be slow or unstable. Use the Python helper to generate a Save Index (.json), then load it in the tool.</p>
+
+  <h2>GitHub Pages basemap gotcha</h2>
+  <p>GitHub Pages is case-sensitive. Your basemap must be named exactly <code>map.jpg</code> and be in the same folder as <code>index.html</code>.</p>
 
   <h2>Terminology</h2>
   <ul>
     <li><b>Tile</b>: world coordinate (what b42map shows)</li>
-    <li><b>Bin</b>: 8×8 tiles stored as one <code>.bin</code></li>
-    <li><b>Cell</b>: 300×300 tiles</li>
+    <li><b>Bin</b>: 8×8 tiles stored as a <code>.bin</code> file</li>
+    <li><b>Cell</b>: 300×300 tiles (useful for keeping regions)</li>
   </ul>
 </body>
 </html>
