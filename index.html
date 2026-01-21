@@ -100,6 +100,7 @@
     .legBox.sh{border:2px dashed rgba(0,255,140,0.9)}
     .legBox.rect{border:2px solid rgba(255,220,80,0.9); background:rgba(255,220,80,0.15)}
     .legBox.del{background:rgba(255,60,87,0.65)}
+    .legBox.bins{background:rgba(122,167,255,0.45)}
     .mobile-only{display:none}
     @media (max-width: 900px){
       .legend{display:none;}
@@ -134,6 +135,7 @@
         <label class="pill"><input id="chkAutoProtectSH" type="checkbox" checked> Auto-protect safehouses</label>
         <label class="pill"><input id="chkShowSH" type="checkbox" checked> Show safehouses</label>
         <label class="pill"><input id="chkSafehouseHeat" type="checkbox" checked> Safehouse heatmap</label>
+        <label class="pill"><input id="chkShowBins" type="checkbox" checked> Show populated bins</label>
       </div>
       <div class="hint" id="indexStatus">No index loaded.</div>
     </div>
@@ -157,7 +159,7 @@
     </div>
 
     <div class="sec">
-      <h2>2) Basemap (built-in) <span class="tip" data-tip="This tool does NOT accept map uploads.&#10;&#10;Put your basemap in the same folder as index.html as: map.jpg&#10;&#10;On GitHub Pages the name is CASE-SENSITIVE.">i</span></h2>
+      <h2>2) View (built-in map) <span class="tip" data-tip="This tool does NOT accept map uploads.&#10;&#10;Put your basemap in the same folder as index.html as: map.jpg&#10;&#10;On GitHub Pages the name is CASE-SENSITIVE.">i</span></h2>
       <div class="row">
         <button id="btnAutoMap" class="primary">Reload map.jpg</button>
         <button id="btnClearMap">Hide map</button>
@@ -215,7 +217,7 @@
       </div>
       <div class="kv" style="margin-top:10px">
         <div><label>Grid opacity</label><input id="gridOpacity" type="range" min="0" max="100" value="35"></div>
-        <div><label>Min zoom to draw</label><input id="minZoom" type="number" value="0.2" step="0.01" min="0.01"></div>
+        <div><label>Min zoom to draw</label><input id="minZoom" type="number" value="0.07" step="0.01" min="0.01"></div>
       </div>
     </div>
 
@@ -297,27 +299,31 @@
       <div id="legend" class="legend">
         <h4>Legend</h4>
 
-        <div class="legRow tip" data-tip="Yellow grid lines show alignment. 'Cell' grid uses 300x300 tiles. 'Bin' grid uses 8x8 tiles.">
+        <div class="legRow legTip" data-tip="Yellow grid lines show alignment. 'Cell' grid uses 300x300 tiles. 'Bin' grid uses 8x8 tiles.">
           <span class="legBox grid"></span><span>Grid</span>
         </div>
 
-        <div class="legRow tip" data-tip="Safehouse proximity heatmap (low). Light red means nearby bases. Darker means higher risk.">
+        <div class="legRow legTip" data-tip="Blue overlay shows which 300x300 cells contain at least one map '.bin' file. This is a fast overview for huge saves. Zoom in to draw/select more precisely.">
+          <span class="legBox bins"></span><span>Populated cells (bins)</span>
+        </div>
+
+        <div class="legRow legTip" data-tip="Safehouse proximity heatmap (low). Light red means nearby bases. Darker means higher risk.">
           <span class="legBox heat1"></span><span>Safehouse proximity (low)</span>
         </div>
 
-        <div class="legRow tip" data-tip="Safehouse proximity heatmap (high). Export is blocked if your delete selection overlaps high-risk cells.">
+        <div class="legRow legTip" data-tip="Safehouse proximity heatmap (high). Export is blocked if your delete selection overlaps high-risk cells.">
           <span class="legBox heat3"></span><span>Safehouse proximity (high)</span>
         </div>
 
-        <div class="legRow tip" data-tip="Cells containing a player safehouse. These are protected (kept) automatically when 'Auto-protect safehouses' is enabled.">
+        <div class="legRow legTip" data-tip="Cells containing a player safehouse. These are protected (kept) automatically when 'Auto-protect safehouses' is enabled.">
           <span class="legBox sh"></span><span>Safehouse cell (protected)</span>
         </div>
 
-        <div class="legRow tip" data-tip="Selection rectangles you add using Shift+Drag or pasted coordinates.">
+        <div class="legRow legTip" data-tip="Selection rectangles you add using Shift+Drag or pasted coordinates.">
           <span class="legBox rect"></span><span>Selection rectangle</span>
         </div>
 
-        <div class="legRow tip" data-tip="Red overlay appears in Dry-run heatmap mode to show what is selected for delete.">
+        <div class="legRow legTip" data-tip="Red overlay appears in Dry-run heatmap mode to show what is selected for delete.">
           <span class="legBox del"></span><span>Selected for delete</span>
         </div>
 
@@ -397,7 +403,11 @@
   let hoveredSafehouse = null;
 
   // Safehouse heatmap intensity
-  let safehouseHeat = new Map();    // cellKey -> intensity [0..5]
+  let safehouseHeat = new Map();
+
+  // Bin coverage (fast overview): cellKey -> number of .bin entries inside that 300x300 cell
+  let binCellCounts = new Map();
+  let binCellMax = 1;    // cellKey -> intensity [0..5]
 
   // Town labels (best-effort)
   const TOWN_LABELS = [
@@ -483,6 +493,17 @@
   }
   function binKey(bx,by){ return bx + "," + by; }
   function parseBKey(k){ const [a,b]=k.split(",").map(Number); return {bx:a,by:b}; }
+
+  function resetBinCoverage(){ binCellCounts = new Map(); binCellMax = 1; }
+  function trackBin(bx,by){
+    allBins.add(binKey(bx,by));
+    const cc = tileToCell(bx*8, by*8);
+    const ck = cellKey(cc.cx, cc.cy);
+    const n = (binCellCounts.get(ck) || 0) + 1;
+    binCellCounts.set(ck, n);
+    if(n > binCellMax) binCellMax = n;
+  }
+
   function rectNormalize(r){
     const x1 = Math.min(r.x1,r.x2), x2=Math.max(r.x1,r.x2);
     const y1 = Math.min(r.y1,r.y2), y2=Math.max(r.y1,r.y2);
@@ -676,6 +697,32 @@
         const alpha = Math.min(0.6, 0.12 * intensity);
         ctx.fillStyle = `rgba(255,60,60,${alpha})`;
         ctx.fillRect(s.x, s.y, size, size);
+      }
+      ctx.restore();
+    }
+
+
+    // Bin coverage (blue): show where map .bin files exist (aggregated per 300x300 cell)
+    if($("chkShowBins") && $("chkShowBins").checked && binCellCounts.size){
+      const tlW = screenToWorld(0,0);
+      const brW = screenToWorld(r.width, r.height);
+      const minCx = Math.floor(Math.min(tlW.x, brW.x)/300)-1;
+      const maxCx = Math.floor(Math.max(tlW.x, brW.x)/300)+1;
+      const minCy = Math.floor(Math.min(tlW.y, brW.y)/300)-1;
+      const maxCy = Math.floor(Math.max(tlW.y, brW.y)/300)+1;
+
+      ctx.save();
+      for(let cx=minCx; cx<=maxCx; cx++){
+        for(let cy=minCy; cy<=maxCy; cy++){
+          const ck = cx + "," + cy;
+          const n = binCellCounts.get(ck);
+          if(!n) continue;
+          const s = worldToScreen(cx*300, cy*300);
+          const size = 300*view.zoom;
+          const a = 0.10 + 0.25 * Math.min(1, n / (binCellMax || 1));
+          ctx.fillStyle = `rgba(122,167,255,${a})`;
+          ctx.fillRect(s.x, s.y, size, size);
+        }
       }
       ctx.restore();
     }
@@ -1106,6 +1153,7 @@
 
   async function scanMapBinsRW(root){
     allBins.clear();
+    resetBinCoverage();
     const mapDir = await root.getDirectoryHandle("map", {create:false});
     let folderCount = 0;
     for await (const entry of mapDir.entries()){
@@ -1122,7 +1170,7 @@
         if(!fname.endsWith(".bin")) continue;
         const by = Number(fname.replace(".bin",""));
         if(!Number.isFinite(by)) continue;
-        allBins.add(binKey(bx,by));
+        trackBin(bx,by);
       }
       folderCount++;
       if(folderCount % 40 === 0) await sleep0();
@@ -1148,7 +1196,7 @@
     for(const f of files){
       const p = f.webkitRelativePath || f.name || "";
       const m = p.match(/(?:^|\/)map\/(\d+)\/(\d+)\.bin$/i);
-      if(m){ allBins.add(binKey(Number(m[1]),Number(m[2]))); count++; }
+      if(m){ trackBin(Number(m[1]),Number(m[2])); count++; }
     }
     usingIndex = false;
     $("fastBadge").style.display = "none";
@@ -1175,12 +1223,13 @@
     usingIndex = true;
     fsRoot = null;
     allBins.clear();
+    resetBinCoverage();
     let total = 0;
     for(const bx in d.bins){
       const arr = d.bins[bx];
       if(!Array.isArray(arr)) continue;
       for(const by of arr){
-        allBins.add(bx + "," + by);
+        trackBin(Number(bx), Number(by));
         total++;
       }
     }
@@ -1270,7 +1319,7 @@
 
     function hide(){ if(!pinned) tipBox.style.display="none"; }
 
-    document.querySelectorAll(".tip").forEach(el=>{
+    document.querySelectorAll(".tip, .legTip").forEach(el=>{
       el.addEventListener("mouseenter", ()=>{ if(!pinned) show(el); });
       el.addEventListener("mouseleave", hide);
       el.addEventListener("click", (e)=>{
