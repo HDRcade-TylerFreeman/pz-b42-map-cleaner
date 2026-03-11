@@ -676,36 +676,79 @@ function exportScript(osKind){
     log("Downloaded Windows delete script.");
   } else {
     const out=[];
+
     out.push("#!/usr/bin/env bash");
     out.push("set -euo pipefail");
+    out.push("");
     out.push("echo \"HDRcade PZ B42 Map Cleaner - DELETE SCRIPT\"");
     out.push("echo \"------------------------------------------------\"");
-    out.push("echo \"This will delete map/ coordinate .bin files.\"");
+    out.push("echo \"Running with Bash version: $BASH_VERSION\"");
+    out.push("echo \"\"");
     out.push("echo \"Run this from your SAVE ROOT (contains map/)\"");
     out.push("");
+
     out.push("if [ ! -d \"./map\" ]; then");
     out.push("  echo \"ERROR: ./map not found in current directory.\"");
     out.push("  echo \"Please run this .sh from the save root that contains map/\"");
     out.push("  exit 1");
     out.push("fi");
+
     out.push("echo \"OK: map/ folder found.\"");
-    out.push("COUNT=0");
+    out.push("");
+
+    out.push("TMP_LIST=\"hdrcade_delete_list.txt\"");
+    out.push("rm -f \"$TMP_LIST\"");
+    out.push("touch \"$TMP_LIST\"");
+    out.push("");
+
+    // Build delete list
     for(const [bx, ranges] of Array.from(plan.entries()).sort((a,b)=>a[0]-b[0])){
       out.push(`if [ -d "${mapFolder}/${bx}" ]; then`);
       for(const [a,b] of ranges){
         if(a===b){
-          out.push(`  if [ -f "${mapFolder}/${bx}/${a}.bin" ]; then rm -f "${mapFolder}/${bx}/${a}.bin"; COUNT=$((COUNT+1)); fi`);
+          out.push(`  echo "${mapFolder}/${bx}/${a}.bin" >> \"$TMP_LIST\"`);
         } else {
           out.push(`  for Y in $(seq ${a} ${b}); do`);
-          out.push(`    if [ -f "${mapFolder}/${bx}/${Y}.bin" ]; then rm -f "${mapFolder}/${bx}/${Y}.bin"; COUNT=$((COUNT+1)); fi`);
+          out.push(`    echo "${mapFolder}/${bx}/$Y.bin" >> \"$TMP_LIST\"`);
           out.push("  done");
         }
       }
       out.push("fi");
     }
+
+    out.push("");
+    out.push("DELETE_COUNT=$(wc -l < \"$TMP_LIST\" | tr -d ' ')");
+    out.push("");
+    out.push("echo \"Planned deletions: $DELETE_COUNT files\"");
+    out.push("echo \"\"");
+    out.push("read -p \"Continue with deletion? (y/N): \" confirm");
+    out.push("if [[ $confirm != [yY] ]]; then");
+    out.push("  echo \"Cancelled.\"");
+    out.push("  rm -f \"$TMP_LIST\"");
+    out.push("  exit 0");
+    out.push("fi");
+
+    out.push("");
+    out.push("echo \"Deleting files...\"");
+    out.push("");
+
+    out.push("COUNT=0");
+    out.push("while IFS= read -r file; do");
+    out.push("  if [ -f \"$file\" ]; then");
+    out.push("    rm -f \"$file\"");
+    out.push("    COUNT=$((COUNT+1))");
+    out.push("  fi");
+    out.push("done < \"$TMP_LIST\"");
+
+    out.push("");
+    out.push("rm -f \"$TMP_LIST\"");
+    out.push("");
+
     out.push("echo \"\"");
     out.push("echo \"DONE. Deleted ${COUNT} files.\"");
-    downloadText(`hdrcade_delete_map_bins_${dt}.sh`, out.join("\n"));
+    out.push("");
+
+    downloadText(`hdrcade_delete_map_bins_${dt}.sh`, out.join("\n") + "\n");
     log("Downloaded Linux delete script.");
   }
 }
@@ -1195,8 +1238,3 @@ draw();
 </script>
 </body>
 </html>
-
-
-
-
-
